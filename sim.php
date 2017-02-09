@@ -3,6 +3,8 @@
 
 $STATE_FILE = "/var/www/magnite.org/game_state.dat";
 
+$snake_colours = array(1 => '#FF4444', 2 => '#AAAA00', 3 => '#00EE33', 4 => '#2222FF', 5 => '#44EEEE', 6 => '#EE55EE', 7 => '88EE44', 8=> '#4477EE', 9=> '#FF8822');
+
 function initaliseGameState( &$gameState ){
 	$state = json_decode( $gameState, true );
 	$state['board_width'] = 20;
@@ -39,10 +41,10 @@ function getDirection( $state, $s ){
 	$right = true;
 	$down = true;
 
-	$targetLeft = false;
-	$targetUp = false;
-	$targetRight = false;
-	$targetDown = false;
+	$targetLeft = 0;
+	$targetUp = 0;
+	$targetRight = 0;
+	$targetDown = 0;
 
 	$snake = $state['snakes'][$s];
 
@@ -161,8 +163,9 @@ function getDirection( $state, $s ){
 	// Goal, head in direction of 1) free space and 2) food 
 
 	// If closer to food than anyone else go for it.
+	// TODO
 
-	// Proof of concept
+	// Proof of concept look farther the hungrier the snake is
 	$vision = 1;
 	if($state['snakes'][$s]['health'] < 80){
                 $vision = 4;
@@ -182,43 +185,47 @@ function getDirection( $state, $s ){
 				$state['snakes'][$s]['y'] == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetLeft = true;
+				$targetLeft = 10;
 			}
 			if( $state['snakes'][$s]['x'] == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] - $v == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetUp = true;
+				$targetUp = 10;
 			}	
 			if( $state['snakes'][$s]['x'] + $v == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetRight = true;
+				$targetRight = 10;
 			} 
 			if( $state['snakes'][$s]['x']  == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] + $v == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetDown = true;
+				$targetDown = 10;
 			}	
 		}	
 	}
 
+	// Go in direction of open space. Avoid being trapped.
 
-	if($targetLeft && $left){
-		return 0;
+
+
+
+	if($targetLeft > max($targetUp, $targetRight, $targetDown) && $left){
+		return 0; // Go left
 	}	
-	if($targetUp && $up){
-		return 1;
+	if($targetUp > max($targetLeft, $targetRight, $targetDown) && $up){
+		return 1; // Go up
 	}
-	if($targetRight && $right){
-		return 2;
+	if($targetRight > max($targetLeft, $targetUp, $targetDown) && $right){
+		return 2; // Go Right
 	}
-	if($targetDown && $down){
-		return 3;
+	if($targetDown > max($targetLeft, $targetUp, $targetRight) && $down){
+		return 3; // Go Down
 	}
-	for($i = 0; $i < 10; $i++ ){
+	for($i = 0; $i < 10; $i++ ){ // Bit of a hack
 		$dir = rand(0, 3);
 		if($dir == 0 && $left){
 			return 0;
@@ -398,17 +405,21 @@ function getGameState(){
 }
 
 function getBoard( $gameState ){
+	global $snake_colours;
 	$state = json_decode( $gameState, true );	
-	$game = "<table cellspacing='1' cellpadding='1' bgcolor='#CCCCCC' border=0>";
+	$game = "<table cellspacing='1' cellpadding='1' bgcolor='#CCCCCC' border=0 style='table-layout:fixed; overflow:hidden; white-space: nowrap; '>";
 	for( $h = 0; $h < $state['board_height']; $h++ ){
 		$game .= "<tr>";
 		for( $w = 0; $w < $state['board_width']; $w++ ){
-			$game .= "<td width='26' height='26' bgcolor='#FFFFFF'>";
+			$cell = '';
+			//$game .= "<td width='26' height='26' bgcolor='#FFFFFF'>";
+			$cellColor = '#FFFFFF';
 
 			for( $f = 0; $f < count($state['foods']) - 1; $f++ ){
 				if( $w == $state['foods'][$f]['x'] && $h == $state['foods'][$f]['y'] ){
                                         if($state['foods'][$f]['active'] == true){
-						$game .= " *";
+						//$game .= " *";
+						$cell .= "*";
 					}
                                 }	
 			}
@@ -419,9 +430,10 @@ function getBoard( $gameState ){
 					$state['snakes'][$s]['alive'] == true 
 				){
 					if( $state['snakes'][$s]['alive'] == true  ){
-						$game .= " <b><font color='#22BB22'>".$s."</font></b> <font size='1'>". $state['snakes'][$s]['health'] ."</font> ";
+						$cellColor = $snake_colours[$s];
+						$cell .= " <b><font color='#22BB22'>".$s."</font></b> <font size='1'>". $state['snakes'][$s]['health'] ."</font> ";
 					} else {
-						$game .= " <b><font color='#FF0000'>S</font></b> ";
+						$cell .= " <b><font color='#FF0000'>S</font></b> ";
 					}
 				}
 				
@@ -430,11 +442,14 @@ function getBoard( $gameState ){
 						$h == $state['snakes'][$s]['tails'][$t]['y'] && 
 						$state['snakes'][$s]['alive'] == true
 					){
-                                        	$game .= "s";
+						$cellColor = $snake_colours[$s];
+                                        	$cell .= "s";
                                 	}	
 				}
 			}	
-
+	
+			$game .= "<td width='26' height='26' bgcolor='".$cellColor."' style='  ' >";	
+			$game .= $cell;
 			$game .= "</td>";
 		}
 		$game .= "</tr>";
