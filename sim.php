@@ -1,7 +1,7 @@
 <?php
 
 $STATE_FILE = "/var/www/magnite.org/game_state.dat";
-$snake_colours = array(1 => '#FF4444', 2 => '#AAAA00', 3 => '#00EE33', 4 => '#2222FF', 5 => '#44EEEE', 6 => '#EE55EE', 7 => '88EE44', 8=> '#4477EE', 9=> '#FF8822');
+$snake_colours = array(1 => '#FF4444', 2 => '#AAAA00', 3 => '#00EE22', 4 => '#2222FF', 5 => '#44EEEE', 6 => '#EE55EE', 7 => '88EE88', 8=> '#4477EE', 9=> '#FF8822');
 
 function initaliseGameState( &$gameState ){
 	$state = json_decode( $gameState, true );
@@ -190,7 +190,7 @@ function getDirection( $state, $s ){
 						$clear = false;
 					}
 				}
-				if($clear){
+				if($clear && $left){
 					$targetLeft += 10;
 				}
 			}
@@ -205,7 +205,7 @@ function getDirection( $state, $s ){
                                                 $clear = false;
                                         }
                                 }
-                                if($clear){
+                                if($clear && $up){
 					$targetUp += 10;
 				}
 			}	
@@ -220,7 +220,7 @@ function getDirection( $state, $s ){
                                                 $clear = false;
                                         }
                                 }
-                                if($clear){	
+                                if($clear && $right){	
 					$targetRight += 10;
 				}
 			} 
@@ -235,17 +235,67 @@ function getDirection( $state, $s ){
                                                 $clear = false;
                                         }
                                 }
-                                if($clear){
+                                if($clear && $down){
 					$targetDown += 10;
 				}
 			}	
 		}	
 	}
 
+	//
+	// Any angle Food target. Head towards closest food if there is no obsticle.
+	//
+	$dirWeight = 1;
+        if($state['snakes'][$s]['health'] < 50){  // Prioritize food when health low
+                $dirWeight = 15;
+        }
+	$distances = array();
+	for( $f = 0; $f < count($state['foods']); $f++ ){
+		if( $state['foods'][$f]['active'] == true ){
+			$fx = (float)$state['foods'][$f]['x'];
+			$fy = (float)$state['foods'][$f]['y'];  
+			$distances[$f] = sqrt( pow( (float)$x - $fx , 2) + pow( (float)$y - $fy, 2) );
+			//echo "  d " . $distances[$f]  . "  - $x $y -> ".$state['foods'][$f]['x']." ".$state['foods'][$f]['y']."   <br>";
+			// Calculate obsticles in path
+			
+			// If other snakes (c) are within bounding box of curr snake and
+                        $range = isRangeEmpty( $state, $x, $y, $fx, $fy );
+			if($range > 0){
+				$distances[$f] = 999999; // Forget it	
+			}
+			//echo " range " . $range . "<br>";                 
+		}		
+	}		
+	asort($distances);
+        reset($distances);
+        $closestKey = key($distances);
+        $closestValue = $distances[$closestKey];
+	$xDir = $state['foods'][$closestKey]['x'] - $x;
+	$yDir = $state['foods'][$closestKey]['y'] - $y;
+	//echo "  snake " . $x ." " . $y ."  food " . $state['foods'][$closestKey]['x'] . " " . $state['foods'][$closestKey]['y'] . "<br>";  
+	//echo "  dir ".$xDir." ".$yDir."  i: " . $closestKey . " dist: " . $closestValue . "<br>";	
+	if( $closestValue < 100 ){
+		if( abs($xDir) > abs($yDir) ){ // horizontal
+			if( $xDir < 0 && $left){
+				$targetLeft += $dirWeight;
+			} else if($right) {
+				$targetRight += $dirWeight;
+			}
+		} else {			// Vertical
+			if( $yDir < 0 && $up ){
+				$targetUp += $dirWeight;
+			} else if($down) {
+				$targetDown += $dirWeight;
+			}
+		}
+	}
+
+
 
 	// Linear Free Space Target, Go in direction of open space. Avoid being trapped.	
+	// This will fail if there is a way out and it is tricked into a cave.
 	$vision = 6;
-	$spaceWeight = 1;
+	$spaceWeight = 2;
 	$leftSpace = 0;	
 	for($i = 1; $i < $vision + 1; $i++){
 		if(isSpaceEmpty( $state, $x - $i, $y ) ){
@@ -282,16 +332,16 @@ function getDirection( $state, $s ){
         $worstValue = $directions[$worstKey];	
 	//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
 	if($bestValue > 0 && $bestValue > $worstValue){
-		if($bestKey == 'left'){
+		if($bestKey == 'left' && $left){
 			$targetLeft += $spaceWeight;
 		}
-		if($bestKey == 'up'){
+		if($bestKey == 'up' && $up){
 			$targetUp += $spaceWeight;
 		}
-		if($bestKey == 'right'){
+		if($bestKey == 'right' && $right){
                         $targetRight += $spaceWeight;
                 }	
-		if($bestKey == 'down'){
+		if($bestKey == 'down' && $down){
                         $targetDown += $spaceWeight;
                 }	
 	}
@@ -346,6 +396,7 @@ function getDirection( $state, $s ){
 			return 3;
 		}
 	}
+	if( rand(0, 1) == 1 ){return 1;} // Go up
 	return 3; // No other option? Just go down town. Thats what I would do.
 }
 
@@ -470,6 +521,22 @@ function advanceState( $gameState ){
 
 	$gameState = json_encode( (array)$state );
 	return $gameState; 
+}
+
+function isRangeEmpty( $state, $x1, $y1, $x2, $y2 ){
+	$count = 0;
+	$minX = min($x1, $x2);
+	$minY = min($y1, $y2);
+	$maxX = max($x1, $x2);
+	$maxY = max($y1, $y2);
+	for( $x = $minX + 1; $x < $maxX; $x++ ){
+		for( $y = $minY + 1; $y < $maxY; $y++ ){		
+			if( !isSpaceEmpty($state, $x, $y) ){
+				$count++;
+			}			
+		}
+	}	
+	return $count;
 }
 
 function isSpaceEmpty( $state, $x, $y ){
