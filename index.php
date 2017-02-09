@@ -9,21 +9,21 @@ if($gameState == ''){
         $gameState = initaliseGameState( $gameState );
 }
 
-if($_POST['next'] != ''){
+if(@$_POST['next'] != ''){
 	echo "Next <br>";
 	$gameState = advanceState( $gameState );	
 	//echo " advance " . $gameState;
 	setGameState( $gameState );
 	//getGameState();
 }
-if($_POST['reset'] != ''){
+if(@$_POST['reset'] != ''){
 	echo "Reset <br>";
 	$gameState = initaliseGameState( $gameState );
 	$_SESSION['play'] = false;
 	setGameState( $gameState );
 	//$_SESSION['gameState'] = $gameState;
 }
-if($_POST['play'] != ''){
+if(@$_POST['play'] != ''){
 	if($_SESSION['play'] == true){
 		$_SESSION['play'] = false;
 	} else {
@@ -37,14 +37,14 @@ $alive = snakesAlive( $gameState );
 ?>
 <html>
 <head>
-<?php if($_SESSION['play'] == true && $alive > 1){
+<?php if(@$_SESSION['play'] == true && $alive > 1){
   $gameState = advanceState( $gameState );
   setGameState( $gameState );
   $_SESSION['gameState'] = $gameState;
   echo "<script>".
     "setTimeout(function(){ ".
     " window.location='index.php'; ".
-    " }, 500); ". 
+    " }, 200); ". 
   "</script>";
 }?>
 </head>

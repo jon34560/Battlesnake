@@ -51,7 +51,6 @@ function getDirection( $state, $s ){
 	// Avoid collision with edge
 	$x = $state['snakes'][$s]['x'];
 	$y = $state['snakes'][$s]['y'];
-	//echo " x " . $x . " " . $y . " ";
 	if($state['snakes'][$s]['x'] - 1 < 0){
 		$left = false;	
 	}
@@ -208,11 +207,60 @@ function getDirection( $state, $s ){
 		}	
 	}
 
-	// Go in direction of open space. Avoid being trapped.
+	// Go in direction of open space. Avoid being trapped.	
+	$vision = 5;
+	$leftSpace = 0;	
+	for($i = 1; $i < $vision + 1; $i++){
+		if(isSpaceEmpty( $state, $x - $i, $y ) ){
+			$leftSpace++;
+		}		
+	}
+	$upSpace = 0;
+        for($i = 1; $i < $vision + 1; $i++){
+                if(isSpaceEmpty( $state, $x, $y - $i ) ){
+                        $upSpace++;
+                }
+        }		
+	$rightSpace = 0;
+        for($i = 1; $i < $vision + 1; $i++){
+                if(isSpaceEmpty( $state, $x + $i, $y ) ){
+                        $rightSpace++;
+                }
+        }	
+	$downSpace = 0;
+        for($i = 1; $i < $vision + 1; $i++){
+                if(isSpaceEmpty( $state, $x, $y + $i ) ){
+                        $downSpace++;
+                }
+        }
+	// Sort best direction	
+	$directions = array( 'left' => $leftSpace, 'up' => $upSpace, 'right' => $rightSpace, 'down' => $downSpace );
+	arsort($directions);
+	reset($directions);
+	$bestKey = key($directions);
+	$bestValue = $directions[$bestKey];
+	asort($directions);
+        reset($directions);
+        $worstKey = key($directions);
+        $worstValue = $directions[$worstKey];	
+	//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
+	if($bestValue > 0 && $bestValue > $worstValue){
+		if($bestKey == 'left'){
+			$targetLeft += 5;
+		}
+		if($bestKey == 'up'){
+			$targetUp += 5;
+		}
+		if($bestKey == 'right'){
+                        $targetRight += 5;
+                }	
+		if($bestKey == 'down'){
+                        $targetDown += 5;
+                }	
+	}
+	
 
-
-
-
+	// I don't like this. It will ignore good info if there are two best !!!!!!!!!!!!!!!!!!
 	if($targetLeft > max($targetUp, $targetRight, $targetDown) && $left){
 		return 0; // Go left
 	}	
@@ -365,9 +413,36 @@ function advanceState( $gameState ){
 	return $gameState; 
 }
 
-function isSpaceEmpty( $gameState, $x, $y ){
-
-	return false;
+function isSpaceEmpty( $state, $x, $y ){
+	if($x < 0){
+		return false;
+	}
+	if($y < 0){
+		return false;
+	}
+	if($x > ($state['board_width'] - 1)){
+		return false;
+	}
+	if($y > ($state['board_height'] - 1)){
+		return false;
+	}
+	for( $s = 0; $s < count($state['snakes']); $s++ ){
+                if( $state['snakes'][$s]['x'] == $x && 
+			$state['snakes'][$s]['y'] == $y && 
+			$state['snakes'][$s]['alive'] == true
+		){
+			return false;	
+		}
+		for( $t = 0; $t < count( $state['snakes'][$s]['tails']); $t++ ){
+			if( $x == $state['snakes'][$s]['tails'][$t]['x'] &&
+				$y == $state['snakes'][$s]['tails'][$t]['y'] &&
+				$state['snakes'][$s]['alive'] == true
+                	){
+				return false;
+			}			
+		}	
+	}	
+	return true;
 }
 
 function snakesAlive( $gameState ){
@@ -412,7 +487,6 @@ function getBoard( $gameState ){
 		$game .= "<tr>";
 		for( $w = 0; $w < $state['board_width']; $w++ ){
 			$cell = '';
-			//$game .= "<td width='26' height='26' bgcolor='#FFFFFF'>";
 			$cellColor = '#FFFFFF';
 
 			for( $f = 0; $f < count($state['foods']) - 1; $f++ ){
@@ -443,7 +517,7 @@ function getBoard( $gameState ){
 						$state['snakes'][$s]['alive'] == true
 					){
 						$cellColor = $snake_colours[$s];
-                                        	$cell .= "s";
+                                        	//$cell .= " <font color='#888888'>s</font>";
                                 	}	
 				}
 			}	
