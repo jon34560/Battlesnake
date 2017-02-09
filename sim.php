@@ -22,7 +22,7 @@ function initaliseGameState( &$gameState ){
 	$state['snakes'] = $snakes;
 
 	$foods = array();
-	for($f = 0; $f < 10; $f++){
+	for($f = 0; $f < 12; $f++){
 		$foods[$f]['active'] = true;	
 		$foods[$f]['x'] = rand(0, $state['board_width'] - 1);
 		$foods[$f]['y'] = rand(0, $state['board_height'] - 1); 
@@ -127,7 +127,7 @@ function getDirection( $state, $s ){
 
                                 // Collide with another snake tail
                                 for( $t = 0; $t < count($state['snakes'][$c]['tails']); $t++ ){
-                                        if( $state['snakes'][$c]['tails'][$t]['x'] - 1 == $state['snakes'][$s]['x'] &&
+                                        if( $state['snakes'][$c]['tails'][$t]['x'] == $state['snakes'][$s]['x'] - 1 &&
                                                 $state['snakes'][$c]['tails'][$t]['y'] == $state['snakes'][$s]['y']
                                         ){
 						$left = false;		
@@ -135,13 +135,13 @@ function getDirection( $state, $s ){
                                 }
 				for( $t = 0; $t < count($state['snakes'][$c]['tails']); $t++ ){
                                         if( $state['snakes'][$c]['tails'][$t]['x']  == $state['snakes'][$s]['x'] &&
-                                                $state['snakes'][$c]['tails'][$t]['y'] - 1 == $state['snakes'][$s]['y']
+                                                $state['snakes'][$c]['tails'][$t]['y'] == $state['snakes'][$s]['y'] - 1
                                         ){
                                                 $up = false;
                                         }
                                 }
 				for( $t = 0; $t < count($state['snakes'][$c]['tails']); $t++ ){
-                                        if( $state['snakes'][$c]['tails'][$t]['x'] + 1 == $state['snakes'][$s]['x'] &&
+                                        if( $state['snakes'][$c]['tails'][$t]['x'] == $state['snakes'][$s]['x'] + 1 &&
                                                 $state['snakes'][$c]['tails'][$t]['y'] == $state['snakes'][$s]['y']
                                         ){
                                                 $right = false;
@@ -149,7 +149,7 @@ function getDirection( $state, $s ){
                                 }
 				for( $t = 0; $t < count($state['snakes'][$c]['tails']); $t++ ){
                                         if( $state['snakes'][$c]['tails'][$t]['x'] == $state['snakes'][$s]['x'] &&
-                                                $state['snakes'][$c]['tails'][$t]['y'] + 1 == $state['snakes'][$s]['y']
+                                                $state['snakes'][$c]['tails'][$t]['y'] == $state['snakes'][$s]['y'] + 1
                                         ){
                                                 $down = false;
                                         }
@@ -162,7 +162,8 @@ function getDirection( $state, $s ){
 	// If closer to food than anyone else go for it.
 	// TODO
 
-	// Proof of concept look farther the hungrier the snake is
+	// Linear Food Target, Proof of concept look farther the hungrier the snake is
+	// Only target food if there is a clear path.
 	$vision = 1;
 	if($state['snakes'][$s]['health'] < 80){
                 $vision = 4;
@@ -171,7 +172,7 @@ function getDirection( $state, $s ){
                 $vision = 6;
         }
 	if($state['snakes'][$s]['health'] < 60){
-                $vision = 10;
+                $vision = 12;
         }	
 	if($state['snakes'][$s]['health'] < 50){
 		$vision = 20;
@@ -182,32 +183,69 @@ function getDirection( $state, $s ){
 				$state['snakes'][$s]['y'] == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetLeft += 10;
+				// Is path clear 
+				$clear = true;
+				for($p = $x - 1; $p > $state['foods'][$f]['x']; $p--){
+					if( !isSpaceEmpty( $state, $p, $y ) ){
+						$clear = false;
+					}
+				}
+				if($clear){
+					$targetLeft += 10;
+				}
 			}
 			if( $state['snakes'][$s]['x'] == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] - $v == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetUp += 10;
+				// Is path clear
+                                $clear = true;
+                                for($p = $y - 1; $p > $state['foods'][$f]['y']; $p--){
+                                        if( !isSpaceEmpty( $state, $x, $p ) ){
+                                                $clear = false;
+                                        }
+                                }
+                                if($clear){
+					$targetUp += 10;
+				}
 			}	
 			if( $state['snakes'][$s]['x'] + $v == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetRight += 10;
+				// Is path clear
+                                $clear = true;
+                                for($p = $x + 1; $p < $state['foods'][$f]['x']; $p++){
+                                        if( !isSpaceEmpty( $state, $p, $y ) ){
+                                                $clear = false;
+                                        }
+                                }
+                                if($clear){	
+					$targetRight += 10;
+				}
 			} 
 			if( $state['snakes'][$s]['x']  == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] + $v == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetDown += 10;
+				// Is path clear
+                                $clear = true;
+                                for($p = $y + 1; $p < $state['foods'][$f]['y']; $p++){
+                                        if( !isSpaceEmpty( $state, $x, $p ) ){
+                                                $clear = false;
+                                        }
+                                }
+                                if($clear){
+					$targetDown += 10;
+				}
 			}	
 		}	
 	}
 
-	// Go in direction of open space. Avoid being trapped.	
-	$vision = 4;
-	$spaceWeight = 0;
+
+	// Linear Free Space Target, Go in direction of open space. Avoid being trapped.	
+	$vision = 6;
+	$spaceWeight = 1;
 	$leftSpace = 0;	
 	for($i = 1; $i < $vision + 1; $i++){
 		if(isSpaceEmpty( $state, $x - $i, $y ) ){
@@ -257,6 +295,11 @@ function getDirection( $state, $s ){
                         $targetDown += $spaceWeight;
                 }	
 	}
+
+	// Flood fill free space target. If there is more free space in one direction and a path to it go.
+
+	
+
 	
 
 	// Head in direction of best target if it is > 0 and > worst target. 
