@@ -1,8 +1,6 @@
 <?php
-//session_start();
 
 $STATE_FILE = "/var/www/magnite.org/game_state.dat";
-
 $snake_colours = array(1 => '#FF4444', 2 => '#AAAA00', 3 => '#00EE33', 4 => '#2222FF', 5 => '#44EEEE', 6 => '#EE55EE', 7 => '88EE44', 8=> '#4477EE', 9=> '#FF8822');
 
 function initaliseGameState( &$gameState ){
@@ -91,10 +89,10 @@ function getDirection( $state, $s ){
 	// Other snakes
 	// NOTE: doesn't prevent two snakes from walking into the same space next round.
 	for( $c = 0;  $c < count($state['snakes']); $c++ ){
-                        if($c != $s &&
-                                $state['snakes'][$s]['alive'] == true &&
-                                $state['snakes'][$c]['alive'] == true
-                        ){
+		if($c != $s &&
+			$state['snakes'][$s]['alive'] == true &&
+			$state['snakes'][$c]['alive'] == true
+		){
                                 // Collide with another snake head
                                 if( $state['snakes'][$c]['x'] == $state['snakes'][$s]['x'] - 1 &&
                                         $state['snakes'][$c]['y'] == $state['snakes'][$s]['y']  
@@ -184,31 +182,32 @@ function getDirection( $state, $s ){
 				$state['snakes'][$s]['y'] == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetLeft = 10;
+				$targetLeft += 10;
 			}
 			if( $state['snakes'][$s]['x'] == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] - $v == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetUp = 10;
+				$targetUp += 10;
 			}	
 			if( $state['snakes'][$s]['x'] + $v == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetRight = 10;
+				$targetRight += 10;
 			} 
 			if( $state['snakes'][$s]['x']  == $state['foods'][$f]['x'] && 
 				$state['snakes'][$s]['y'] + $v == $state['foods'][$f]['y'] && 
 				$state['foods'][$f]['active'] == true
 			){
-				$targetDown = 10;
+				$targetDown += 10;
 			}	
 		}	
 	}
 
 	// Go in direction of open space. Avoid being trapped.	
-	$vision = 5;
+	$vision = 4;
+	$spaceWeight = 0;
 	$leftSpace = 0;	
 	for($i = 1; $i < $vision + 1; $i++){
 		if(isSpaceEmpty( $state, $x - $i, $y ) ){
@@ -246,33 +245,49 @@ function getDirection( $state, $s ){
 	//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
 	if($bestValue > 0 && $bestValue > $worstValue){
 		if($bestKey == 'left'){
-			$targetLeft += 5;
+			$targetLeft += $spaceWeight;
 		}
 		if($bestKey == 'up'){
-			$targetUp += 5;
+			$targetUp += $spaceWeight;
 		}
 		if($bestKey == 'right'){
-                        $targetRight += 5;
+                        $targetRight += $spaceWeight;
                 }	
 		if($bestKey == 'down'){
-                        $targetDown += 5;
+                        $targetDown += $spaceWeight;
                 }	
 	}
 	
 
-	// I don't like this. It will ignore good info if there are two best !!!!!!!!!!!!!!!!!!
-	if($targetLeft > max($targetUp, $targetRight, $targetDown) && $left){
-		return 0; // Go left
-	}	
-	if($targetUp > max($targetLeft, $targetRight, $targetDown) && $up){
-		return 1; // Go up
+	// Head in direction of best target if it is > 0 and > worst target. 
+	//I.e. if they are all the same skip and choose randomly later.
+	// IDEA: if we can't go in one direction we should give higher preference to allowable dirs
+	$targets = array( 'left' => $targetLeft, 'up' => $targetUp, 'right' => $targetRight, 'down' => $targetDown );
+	arsort($targets);
+        reset($targets);
+        $bestKey = key($targets);
+        $bestValue = $targets[$bestKey];
+        asort($targets);
+        reset($targets);
+        $worstKey = key($targets);
+        $worstValue = $targets[$worstKey];
+	//echo " Target best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>";	
+	if($bestValue > 0 && $bestValue > $worstValue){
+		if($bestKey == 'left' && $left){
+			return 0; // Go left
+		}	
+		if($bestKey == 'up' && $up){
+			return 1; // Go up
+		}
+		if($bestKey == 'right' && $right){
+			return 2; // Go Right
+		}
+		if($bestKey == 'down' && $down){
+			return 3; // Go Down
+		}
 	}
-	if($targetRight > max($targetLeft, $targetUp, $targetDown) && $right){
-		return 2; // Go Right
-	}
-	if($targetDown > max($targetLeft, $targetUp, $targetRight) && $down){
-		return 3; // Go Down
-	}
+
+	// Chose a random free space. This is a fallback
 	for($i = 0; $i < 10; $i++ ){ // Bit of a hack
 		$dir = rand(0, 3);
 		if($dir == 0 && $left){
@@ -288,7 +303,7 @@ function getDirection( $state, $s ){
 			return 3;
 		}
 	}
-	return 3; // No other option? Just go down town.
+	return 3; // No other option? Just go down town. Thats what I would do.
 }
 
 function advanceState( $gameState ){
