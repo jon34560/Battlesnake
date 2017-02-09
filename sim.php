@@ -93,9 +93,9 @@ function getDirection( $state, $s ){
 			$state['snakes'][$s]['alive'] == true &&
 			$state['snakes'][$c]['alive'] == true
 		){
-                                // Collide with another snake head
-                                if( $state['snakes'][$c]['x'] == $state['snakes'][$s]['x'] - 1 &&
-                                        $state['snakes'][$c]['y'] == $state['snakes'][$s]['y']  
+			// Avoid Collide with another snake head
+			if( $state['snakes'][$c]['x'] == $state['snakes'][$s]['x'] - 1 &&
+				$state['snakes'][$c]['y'] == $state['snakes'][$s]['y']  
                                         //count($state['snakes'][$c]['tails']) >= count( $state['snakes'][$s]['tails']) 
 				){
 						$left = false;
@@ -310,8 +310,7 @@ function advanceState( $gameState ){
 	$state = json_decode( $gameState, true );
 	$state['ticks'] = (int)($state['ticks']) + 1;		
 
-	// advance snakes, 
-	// todo call function for directions
+	// advance snakes position, 
 	for( $s = 0;  $s < count($state['snakes']); $s++ ){
 		if( $state['snakes'][$s]['alive'] == false){
 			continue;
@@ -340,21 +339,22 @@ function advanceState( $gameState ){
 		if( $state['snakes'][$s]['x'] < 0 ||
 			$state['snakes'][$s]['x'] > ($state['board_width'] - 1) || 
 			$state['snakes'][$s]['y'] < 0 ||
-			$state['snakes'][$s]['y'] > ($state['board_height'] - 1) ){
+			$state['snakes'][$s]['y'] > ($state['board_height'] - 1) 
+		){
 			$state['snakes'][$s]['alive'] = false; 	
 		}
 
 		// Collision with self
 		for( $t = 0; $t < count($state['snakes'][$s]['tails']); $t++ ){
 			if( $state['snakes'][$s]['tails'][$t]['x'] == $state['snakes'][$s]['x'] &&
-				$state['snakes'][$s]['tails'][$t]['y'] == $state['snakes'][$s]['y']  ){
+				$state['snakes'][$s]['tails'][$t]['y'] == $state['snakes'][$s]['y']
+			){
 				$state['snakes'][$s]['alive'] = false;
 			}
 		}
 
 
 		// Collision with other except for head and having a longer length.
-		// TODO
 		for( $c = 0;  $c < count($state['snakes']); $c++ ){
 			if($c != $s && 
 				$state['snakes'][$s]['alive'] == true && 
@@ -363,18 +363,19 @@ function advanceState( $gameState ){
 				// Collide with another snake Hhead
 				if( $state['snakes'][$s]['x'] == $state['snakes'][$c]['x'] &&
 					$state['snakes'][$s]['y'] == $state['snakes'][$c]['y']  &&
-					count($state['snakes'][$c]['tails']) >= count( $state['snakes'][$s]['tails']) ){
+					count($state['snakes'][$c]['tails']) >= count( $state['snakes'][$s]['tails']) 
+				){
 					$state['snakes'][$s]['alive'] = false; // S looses head on collision
 					//echo "*** Head On ***";
 				}
 
 				// Collide with another snake tail
 				for( $t = 0; $t < count($state['snakes'][$c]['tails']); $t++ ){
-                        		if( $state['snakes'][$c]['tails'][$t]['x'] == $state['snakes'][$c]['x'] &&
-                                		$state['snakes'][$c]['tails'][$t]['y'] == $state['snakes'][$c]['y']  
+                        		if( $state['snakes'][$c]['tails'][$t]['x'] == $state['snakes'][$s]['x'] && 
+                                		$state['snakes'][$c]['tails'][$t]['y'] == $state['snakes'][$s]['y']  
 					){
                                 		$state['snakes'][$s]['alive'] = false;
-						$t = count($state['snakes'][$c]['tails']); // end
+						//$t = count($state['snakes'][$c]['tails']); // end
 						//echo "*** Collide Tail " . $s. " t " . $t. " ***";
                         		}
                 		}					
