@@ -52,10 +52,25 @@ $alive = snakesAlive( $gameState );
 <b>BattleSnake Sim</b>
 <br>
 <br>
-<table><tr><td>
+<table><tr><td valign='top'>
 <?php
 echo getBoard($gameState); 
 ?>
+
+<br>
+<form action='/' method='post'>
+<input type='submit' name='reset' value='Reset' > &nbsp;
+<input type='submit' name='next' value='Next' > &nbsp;
+<input type='submit' name='play' value='<?php if($_SESSION['play'] == true){echo "Stop";} else {echo "Play";}?>' > &nbsp;
+</form>
+<br>
+
+<textarea cols='80' rows='12'>
+<?php
+echo $gameState . "<br>";
+?>
+</textarea>
+
 </td> <td width='15'></td> <td valign='top'>
 
 <b>Stats</b><br>
@@ -69,7 +84,10 @@ for($s = 0; $s < count( $state['snakes'] ); $s++){
 		($state['snakes'][$s]['alive'] ? "Alive" : "Dead") .
 		" &nbsp; h:" . $state['snakes'][$s]['health'] .
 		" &nbsp; l: " . (count( $state['snakes'][$s]['tails'] ) + 1) .
-		" <br>";
+		" <br>" .
+		" <font size='2'>Log: " . $state['snakes'][$s]['log']. "</font><br>".
+		" <font size='2'>Res: " . $state['snakes'][$s]['reason']. "</font><br> ".
+		" <br> ";
 }
 
 echo "<br>";
@@ -86,17 +104,5 @@ echo "Uneaten food: " . $uneaten . "<br>";
 </td></tr></table>
 
 <br>
-<form action='/' method='post'>
-<input type='submit' name='reset' value='Reset' > &nbsp; 
-<input type='submit' name='next' value='Next' > &nbsp;
-<input type='submit' name='play' value='<?php if($_SESSION['play'] == true){echo "Stop";} else {echo "Play";}?>' > &nbsp; 
-</form>
-<br>
-
-<textarea cols='80' rows='12'>
-<?php
-echo $gameState . "<br>";
-?>
-</textarea>
 </body>
 </html>

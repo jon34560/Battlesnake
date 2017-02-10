@@ -19,6 +19,8 @@ function initaliseGameState( &$gameState ){
 		$snakes[$i]['health'] = 100;
 		$snakes[$i]['alive'] = true;
 		$snakes[$i]['tails'] = array();
+		$snakes[$i]['log'] = ' ';
+		$snakes[$i]['reason'] = ' ';
 	}
 	$state['snakes'] = $snakes;
 
@@ -34,7 +36,7 @@ function initaliseGameState( &$gameState ){
 	return $gameState;
 }
 
-function getDirection( $state, $s ){
+function getDirection( & $state, $s ){
 	global $tick_cache;
 	$left = true; 		// Allowed
 	$up = true;
@@ -194,6 +196,7 @@ function getDirection( $state, $s ){
 				}
 				if($clear && $left){
 					$targetLeft += 10;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Left <br>';
 				}
 			}
 			if( $state['snakes'][$s]['x'] == $state['foods'][$f]['x'] && 
@@ -209,6 +212,7 @@ function getDirection( $state, $s ){
                                 }
                                 if($clear && $up){
 					$targetUp += 10;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Up <br>';
 				}
 			}	
 			if( $state['snakes'][$s]['x'] + $v == $state['foods'][$f]['x'] && 
@@ -224,6 +228,7 @@ function getDirection( $state, $s ){
                                 }
                                 if($clear && $right){	
 					$targetRight += 10;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Right <br>';
 				}
 			} 
 			if( $state['snakes'][$s]['x']  == $state['foods'][$f]['x'] && 
@@ -239,6 +244,7 @@ function getDirection( $state, $s ){
                                 }
                                 if($clear && $down){
 					$targetDown += 10;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Down <br>';
 				}
 			}	
 		}	
@@ -283,14 +289,18 @@ function getDirection( $state, $s ){
 		if( abs($xDir) > abs($yDir) ){ // horizontal
 			if( $xDir < 0 && $left){
 				$targetLeft += $dirWeight;
+				$state['snakes'][$s]['reason'] .= 'Angle Food Left <br>';
 			} else if($right) {
 				$targetRight += $dirWeight;
+				$state['snakes'][$s]['reason'] .= 'Angle Food Right <br>';
 			}
 		} else {			// Vertical
 			if( $yDir < 0 && $up ){
 				$targetUp += $dirWeight;
+				$state['snakes'][$s]['reason'] .= 'Angle Food Up <br>';
 			} else if($down) {
 				$targetDown += $dirWeight;
+				$state['snakes'][$s]['reason'] .= 'Angle Food Down <br>';
 			}
 		}
 	}
@@ -342,15 +352,19 @@ function getDirection( $state, $s ){
 
 		if($bestKey == 'left' && $left){
 			$targetLeft += $spaceWeight;
+			$state['snakes'][$s]['reason'] .= 'Linear Space Left <br>';
 		}
 		if($bestKey == 'up' && $up){
 			$targetUp += $spaceWeight;
+			$state['snakes'][$s]['reason'] .= 'Linear Space Up <br>';
 		}
 		if($bestKey == 'right' && $right){
                         $targetRight += $spaceWeight;
+			$state['snakes'][$s]['reason'] .= 'Linear Space Right <br>';
                 }	
 		if($bestKey == 'down' && $down){
                         $targetDown += $spaceWeight;
+			$state['snakes'][$s]['reason'] .= 'Linear Space Down <br>';
                 }	
 	}
 	
@@ -380,38 +394,47 @@ function getDirection( $state, $s ){
 	$avoidRight = false;
 	$avoidDown = false; 
 	$snakeLength = count($state['snakes'][$s]['tails']) + 1;
+	$state['snakes'][$s]['reason'] .= 'Flood Fill l:' . $leftFill . ' u:' . $upFill . ' r:'. $rightFill . ' d:' . $downFill . '<br>';
 	if( $leftFill > 0 && $leftFill <= count($state['snakes'][$s]['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
 		//$fillWeight = 50; 
 		$avoidLeft = true;
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
 	}
 	if( $upFull > 0 && $upFill <= count($state['snakes'][$s]['tails']) * 2 ){
 		//$fillWeight = 50;
 		$avoidUp = true;
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
 	} 
 	if( $rightFill > 0 && $rightFill <= count($state['snakes'][$s]['tails']) * 2 ){
 		//$fillWeight = 50;
 		$avoidRight = true;
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
 	}
 	if( $downFill > 0 && $downFill <= count($state['snakes'][$s]['tails']) * 2 ){
 		//$fillWeight = 50;
 		$avoidDown = true;
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Down <br>';
 	}
 
 	if ($left && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
 		$targetLeft += 50;
-		echo ".";
+		//echo ".";
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Left Panic <br>';
 	}
 	if ($up && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
                 $targetUp += 50;
-        	echo ".";
+        	//echo ".";
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Up Panic <br>';
 	}
 	if ($right && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
                 $targetRight += 50;
-        	echo ".";
+        	//echo ".";
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Right Panic <br>';	
 	}	
 	if ($down && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
                 $targetDown += 50;
-        	echo ".";
+        	//echo ".";
+		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Down Panic <br>';
 	}
 	
 	$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
@@ -427,15 +450,19 @@ function getDirection( $state, $s ){
         if($bestValue > 0 && $bestValue > $worstValue){
                 if($bestKey == 'left' && $left){
                         $targetLeft += $fillWeight;
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Left '.$fillWeight.' <br>';
                 }
                 if($bestKey == 'up' && $up){
                         $targetUp += $fillWeight;
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Up '.$fillWeight.' <br>';
                 }
                 if($bestKey == 'right' && $right){
                         $targetRight += $fillWeight;
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Right '.$fillWeight.' <br>';
                 }
                 if($bestKey == 'down' && $down){
                         $targetDown += $fillWeight;
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Down '.$fillWeight.' <br>';
                 }
         }
 	
@@ -463,15 +490,19 @@ function getDirection( $state, $s ){
 	//echo " Target best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>";	
 	if($bestValue > 0 && $bestValue > $worstValue){
 		if($bestKey == 'left' && $left){
+			$state['snakes'][$s]['reason'] .= 'Choose Left  <br>';
 			return 0; // Go left
 		}	
 		if($bestKey == 'up' && $up){
+			$state['snakes'][$s]['reason'] .= 'Choose Up  <br>';
 			return 1; // Go up
 		}
 		if($bestKey == 'right' && $right){
+			$state['snakes'][$s]['reason'] .= 'Choose Right  <br>';
 			return 2; // Go Right
 		}
 		if($bestKey == 'down' && $down){
+			$state['snakes'][$s]['reason'] .= 'Choose Down  <br>';
 			return 3; // Go Down
 		}
 	}
@@ -480,15 +511,19 @@ function getDirection( $state, $s ){
 	for($i = 0; $i < 10; $i++ ){ // Bit of a hack
 		$dir = rand(0, 3);
 		if($dir == 0 && $left){
+			$state['snakes'][$s]['reason'] .= 'Choose Random Left  <br>';
 			return 0;
 		} 
 		if($dir == 1 && $up){
+			$state['snakes'][$s]['reason'] .= 'Choose Random Up  <br>';
 			return 1;
 		}
 		if($dir == 2 && $right){
+			$state['snakes'][$s]['reason'] .= 'Choose Random Right  <br>';
 			return 2;
 		}
 		if($dir == 3 && $down){
+			$state['snakes'][$s]['reason'] .= 'Choose Random Down  <br>';
 			return 3;
 		}
 	}
@@ -595,12 +630,13 @@ function advanceState( $gameState ){
 		$state['snakes'][$s]['health'] = $state['snakes'][$s]['health'] - 1; 
 		if( $state['snakes'][$s]['health'] < 0 ){
 			$state['snakes'][$s]['health'] = 0;
-			$state['snakes'][$s]['alive'] = false;	
+			$state['snakes'][$s]['alive'] = false;
+			$state['snakes'][$s]['log'] = 'Starvation.';	
 		}
 
 		$pastPos = array('x' => $state['snakes'][$s]['x'], 'y' => $state['snakes'][$s]['y'] );
 
-
+		$state['snakes'][$s]['reason'] = ''; // Reset
 		$dir = getDirection( $state, $s );
 		if($dir == 0){ // Left
 			$state['snakes'][$s]['x'] =  $state['snakes'][$s]['x'] -1;		
@@ -618,7 +654,8 @@ function advanceState( $gameState ){
 			$state['snakes'][$s]['y'] < 0 ||
 			$state['snakes'][$s]['y'] > ($state['board_height'] - 1) 
 		){
-			$state['snakes'][$s]['alive'] = false; 	
+			$state['snakes'][$s]['alive'] = false; 
+			$state['snakes'][$s]['log'] = 'Collide Wall.';	
 		}
 
 		// Collision with self
@@ -627,6 +664,7 @@ function advanceState( $gameState ){
 				$state['snakes'][$s]['tails'][$t]['y'] == $state['snakes'][$s]['y']
 			){
 				$state['snakes'][$s]['alive'] = false;
+				$state['snakes'][$s]['log'] = 'Collide Self.';
 			}
 		}
 
@@ -644,6 +682,7 @@ function advanceState( $gameState ){
 				){
 					$state['snakes'][$s]['alive'] = false; // S looses head on collision
 					//echo "*** Head On ***";
+					$state['snakes'][$s]['log'] = 'Collide head on.';
 				}
 
 				// Collide with another snake tail
@@ -654,11 +693,13 @@ function advanceState( $gameState ){
                                 		$state['snakes'][$s]['alive'] = false;
 						//$t = count($state['snakes'][$c]['tails']); // end
 						//echo "*** Collide Tail " . $s. " t " . $t. " ***";
+						$state['snakes'][$s]['log'] = 'Collide tail.';
                         		}
                 		}					
 			}
 		}
-			
+
+		//$state['snakes'][$s]['log'] .= '.';			
 
 		// Move tail pieces up
 		$prevTailPiece = null;
