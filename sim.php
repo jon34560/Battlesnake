@@ -353,10 +353,73 @@ function getDirection( $state, $s ){
 
 	// Flood fill free space target. If there is more free space in one direction and a path to it go.
 
-	// Work in progress
-	
-	
+	// Left, count spots that are free one pos over going up until block then move over and down and repeat.
+	$checkPosX = $x - 1;
+	$checkPosY = $y;
+	$oldCheckPosX = $checkPosX;
+	$oldCheckPosY = $checkPosY;
+	$spaces = array();
+	$fillCount = 0;
+	$scaning = true;
+	$scanCount = 0;
+	while($scaning){
+		$key = $checkPosX . '_' . $checkPosY;
+		$isEmpty = false;
+		if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
+			$fillCount++;
+			$isEmpty = true;
+		}
+		$spaces[$key] = array('open' => $isEmpty, 'x' => $checkPosX, 'y' => $checkPosY);
+		//echo " scan ". $key. "  <br>";	
+		// Find next pos to scan 
+		$i = 0;
+		for(  ; $i < count($spaces); $i++ ){
+			//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
+			if( $spaces[$key]['open'] == true ){
+				// Left
+				$tx = $spaces[$key]['x'] - 1;
+				$ty = $spaces[$key]['y'];
+				$tKey = $tx . '_' . $ty; 
+				if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+					$checkPosX = $tx;
+					$checkPosY = $ty;
 
+
+					break;
+				}
+				// Up
+				$tx = $spaces[$key]['x'];
+                                $ty = $spaces[$key]['y'] - 1;  
+                                $tKey = $tx . '_' . $ty;              
+                                if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+                                        $checkPosX = $tx;
+                                        $checkPosY = $ty;
+                                        break;
+                                }		 			
+				// Right
+				
+				// Down
+				$tx = $spaces[$key]['x'];
+                                $ty = $spaces[$key]['y'] + 1;
+                                $tKey = $tx . '_' . $ty;
+                                if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+                                        $checkPosX = $tx;
+                                        $checkPosY = $ty;
+                                        break;
+                                }		
+			}
+		}
+		if($oldCheckPosX == $checkPosX && $oldCheckPosY == $checkPosY){ // No new spot to check found
+			$scaning = false;
+		}
+		$oldCheckPosX = $checkPosX;
+		$oldCheckPosY = $checkPosY;		  
+		$scanCount++;
+		if($scanCount > 950){
+			//$scanning = false;
+		}		
+	}
+	echo "Left fill $s: " . $fillCount . "<br>";
 	
 
 	// Head in direction of best target if it is > 0 and > worst target. 
@@ -403,6 +466,7 @@ function getDirection( $state, $s ){
 			return 3;
 		}
 	}
+	if($left){return 0;} if($up){return 1;} if($right){return 2;} if($down){return 3;}
 	if( rand(0, 1) == 1 ){return 1;} // Go up
 	return 3; // No other option? Just go down town. Thats what I would do.
 }
@@ -544,6 +608,22 @@ function isRangeEmpty( $state, $x1, $y1, $x2, $y2 ){
 		}
 	}	
 	return $count;
+}
+
+function isSpaceOnBoard( $state, $x , $y){
+	if($x < 0){
+                return false;
+        }
+        if($y < 0){
+                return false;
+        }
+        if($x > ($state['board_width'] - 1)){
+                return false;
+        }
+        if($y > ($state['board_height'] - 1)){
+                return false;
+        }
+	return true;	
 }
 
 function isSpaceEmpty( $state, $x, $y ){
