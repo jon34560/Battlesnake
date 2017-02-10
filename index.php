@@ -81,13 +81,13 @@ echo "Ticks: " . $state['ticks'] . "<br><br>";
 
 for($s = 0; $s < count( $state['snakes'] ); $s++){
 	echo "" . $s. " ". 
-		($state['snakes'][$s]['alive'] ? "Alive" : "Dead") .
+		($state['snakes'][$s]['alive'] ? "<font color='#00CC00'>Alive</font>" : "<font color='#CC3333'>Dead</font>") .
 		" &nbsp; h:" . $state['snakes'][$s]['health'] .
 		" &nbsp; l: " . (count( $state['snakes'][$s]['tails'] ) + 1) .
 		" <br>" .
 		" <font size='2'>Log: " . $state['snakes'][$s]['log']. "</font><br>".
 		" <font size='2'>Res: " . $state['snakes'][$s]['reason']. "</font><br> ".
-		" <br> ";
+		"  ";
 }
 
 echo "<br>";

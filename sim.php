@@ -160,6 +160,13 @@ function getDirection( & $state, $s ){
                                 }
                         }
 	}
+	$state['snakes'][$s]['reason'] .= 'Allowed   '.
+		' l: '. ($left?'<b><font color=green><</font></b>':'<font color=red><</font>').
+		' u: '.($up?'<b><font color=green>/\</font></b>':'<font color=red>/\</font>').
+		' r: '.($right?'<b><font color=green>></font></b>':'<font color=red>></font>').
+		' d: '.($down?'<b><font color=green>\/</font></b>':'<font color=red>\/</font>').' <br>';
+
+
 	
 	// Goal, head in direction of 1) free space and 2) food 
 
@@ -169,6 +176,7 @@ function getDirection( & $state, $s ){
 	// Linear Food Target, Proof of concept look farther the hungrier the snake is
 	// Only target food if there is a clear path.
 	$vision = 1;
+	$weight = 10;
 	if($state['snakes'][$s]['health'] < 80){
                 $vision = 4;
         }
@@ -195,8 +203,8 @@ function getDirection( & $state, $s ){
 					}
 				}
 				if($clear && $left){
-					$targetLeft += 10;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Left <br>';
+					$targetLeft += $weight;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Left '.$weight.' <br>';
 				}
 			}
 			if( $state['snakes'][$s]['x'] == $state['foods'][$f]['x'] && 
@@ -211,8 +219,8 @@ function getDirection( & $state, $s ){
                                         }
                                 }
                                 if($clear && $up){
-					$targetUp += 10;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Up <br>';
+					$targetUp += $weight;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Up  '.$weight.' <br>';
 				}
 			}	
 			if( $state['snakes'][$s]['x'] + $v == $state['foods'][$f]['x'] && 
@@ -227,8 +235,8 @@ function getDirection( & $state, $s ){
                                         }
                                 }
                                 if($clear && $right){	
-					$targetRight += 10;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Right <br>';
+					$targetRight += $weight;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Right  '.$weight.' <br>';
 				}
 			} 
 			if( $state['snakes'][$s]['x']  == $state['foods'][$f]['x'] && 
@@ -243,8 +251,8 @@ function getDirection( & $state, $s ){
                                         }
                                 }
                                 if($clear && $down){
-					$targetDown += 10;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Down <br>';
+					$targetDown += $weight;
+					$state['snakes'][$s]['reason'] .= 'Linear Food Down  '.$weight.' <br>';
 				}
 			}	
 		}	
@@ -289,18 +297,18 @@ function getDirection( & $state, $s ){
 		if( abs($xDir) > abs($yDir) ){ // horizontal
 			if( $xDir < 0 && $left){
 				$targetLeft += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Left <br>';
+				$state['snakes'][$s]['reason'] .= 'Angle Food Left '.$dirWeight.' <br>';
 			} else if($right) {
 				$targetRight += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Right <br>';
+				$state['snakes'][$s]['reason'] .= 'Angle Food Right '.$dirWeight.' <br>';
 			}
 		} else {			// Vertical
 			if( $yDir < 0 && $up ){
 				$targetUp += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Up <br>';
+				$state['snakes'][$s]['reason'] .= 'Angle Food Up  '.$dirWeight.' <br>';
 			} else if($down) {
 				$targetDown += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Down <br>';
+				$state['snakes'][$s]['reason'] .= 'Angle Food Down  '.$dirWeight.' <br>';
 			}
 		}
 	}
@@ -352,19 +360,19 @@ function getDirection( & $state, $s ){
 
 		if($bestKey == 'left' && $left){
 			$targetLeft += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Left <br>';
+			$state['snakes'][$s]['reason'] .= 'Linear Space Left '.$spaceWeight.' <br>';
 		}
 		if($bestKey == 'up' && $up){
 			$targetUp += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Up <br>';
+			$state['snakes'][$s]['reason'] .= 'Linear Space Up '.$spaceWeight.' <br>';
 		}
 		if($bestKey == 'right' && $right){
                         $targetRight += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Right <br>';
+			$state['snakes'][$s]['reason'] .= 'Linear Space Right '.$spaceWeight.' <br>';
                 }	
 		if($bestKey == 'down' && $down){
                         $targetDown += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Down <br>';
+			$state['snakes'][$s]['reason'] .= 'Linear Space Down '.$spaceWeight.' <br>';
                 }	
 	}
 	
@@ -527,7 +535,22 @@ function getDirection( & $state, $s ){
 			return 3;
 		}
 	}
-	if($left){return 0;} if($up){return 1;} if($right){return 2;} if($down){return 3;}
+	if($left){
+		$state['snakes'][$s]['reason'] .= 'Go Left  <br>';	
+		return 0;
+	} 
+	if($up){
+		$state['snakes'][$s]['reason'] .= 'Go Up  <br>';
+		return 1;
+	} 
+	if($right){
+		$state['snakes'][$s]['reason'] .= 'Go Right  <br>';
+		return 2;
+	} 
+	if($down){
+		$state['snakes'][$s]['reason'] .= 'Go Down  <br>';
+		return 3;
+	}
 	if( rand(0, 1) == 1 ){return 1;} // Go up
 	return 3; // No other option? Just go down town. Thats what I would do.
 }
@@ -542,7 +565,7 @@ function getDirection( & $state, $s ){
 */
 function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth = 0 ){
 	$directional = false;
-	if($depth > 14){
+	if($depth > 18){
 		return 0;
 	}
 	$oldCheckPosX = $checkPosX;
