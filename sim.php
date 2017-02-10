@@ -380,7 +380,7 @@ function getDirection( & $state, $s ){
 	//
 	// Flood fill free space target. If there is more free space in one direction and a path to it go.
 	//
-	$fillWeight = 2;
+	$fillWeight = 12; // 2; // 12 is better than 2
 	$spaces = array();
 	$checkPosX = $x - 1;
         $checkPosY = $y;	
