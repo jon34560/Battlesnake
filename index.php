@@ -51,8 +51,6 @@ $alive = snakesAlive( $gameState );
 <body>
 <b>BattleSnake Sim</b>
 <br>
-Alive: <?php echo $alive; ?> &nbsp; Ticks: <?php echo ""; ?> 
-<br>
 <br>
 <table><tr><td>
 <?php
@@ -63,7 +61,7 @@ echo getBoard($gameState);
 <b>Stats</b><br>
 <?php 
 $state = json_decode( $gameState, true );
-
+echo "Alive: " . $alive . "<br>"; 
 echo "Ticks: " . $state['ticks'] . "<br><br>";
 
 for($s = 0; $s < count( $state['snakes'] ); $s++){

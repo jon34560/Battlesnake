@@ -353,7 +353,8 @@ function getDirection( $state, $s ){
 
 	// Flood fill free space target. If there is more free space in one direction and a path to it go.
 
-		
+	// Work in progress
+	
 	
 
 	
