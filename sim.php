@@ -246,6 +246,9 @@ function getDirection( $state, $s ){
 	// Any angle Food target. Head towards closest food if there is no obsticle.
 	//
 	$dirWeight = 1;
+	if($state['snakes'][$s]['health'] < 85){  // Prioritize food when health low
+                $dirWeight = 3;
+        }
         if($state['snakes'][$s]['health'] < 50){  // Prioritize food when health low
                 $dirWeight = 15;
         }
@@ -294,7 +297,7 @@ function getDirection( $state, $s ){
 
 	// Linear Free Space Target, Go in direction of open space. Avoid being trapped.	
 	// This will fail if there is a way out and it is tricked into a cave.
-	$vision = 6;
+	$vision = 5;
 	$spaceWeight = 2;
 	$leftSpace = 0;	
 	for($i = 1; $i < $vision + 1; $i++){
@@ -332,6 +335,8 @@ function getDirection( $state, $s ){
         $worstValue = $directions[$worstKey];	
 	//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
 	if($bestValue > 0 && $bestValue > $worstValue){
+		// If in closed space increase spaceWeight. 
+
 		if($bestKey == 'left' && $left){
 			$targetLeft += $spaceWeight;
 		}
@@ -348,6 +353,7 @@ function getDirection( $state, $s ){
 
 	// Flood fill free space target. If there is more free space in one direction and a path to it go.
 
+		
 	
 
 	
