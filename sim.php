@@ -294,11 +294,12 @@ function getDirection( $state, $s ){
 	}
 
 
-
+	//
 	// Linear Free Space Target, Go in direction of open space. Avoid being trapped.	
+	//
 	// This will fail if there is a way out and it is tricked into a cave.
 	$vision = 5;
-	$spaceWeight = 2;
+	$spaceWeight = 1;
 	$leftSpace = 0;	
 	for($i = 1; $i < $vision + 1; $i++){
 		if(isSpaceEmpty( $state, $x - $i, $y ) ){
@@ -350,77 +351,96 @@ function getDirection( $state, $s ){
                         $targetDown += $spaceWeight;
                 }	
 	}
-
-	// Flood fill free space target. If there is more free space in one direction and a path to it go.
-
-	// Left, count spots that are free one pos over going up until block then move over and down and repeat.
-	$checkPosX = $x - 1;
-	$checkPosY = $y;
-	$oldCheckPosX = $checkPosX;
-	$oldCheckPosY = $checkPosY;
-	$spaces = array();
-	$fillCount = 0;
-	$scaning = true;
-	$scanCount = 0;
-	while($scaning){
-		$key = $checkPosX . '_' . $checkPosY;
-		$isEmpty = false;
-		if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
-			$fillCount++;
-			$isEmpty = true;
-		}
-		$spaces[$key] = array('open' => $isEmpty, 'x' => $checkPosX, 'y' => $checkPosY);
-		//echo " scan ". $key. "  <br>";	
-		// Find next pos to scan 
-		$i = 0;
-		for(  ; $i < count($spaces); $i++ ){
-			//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
-			if( $spaces[$key]['open'] == true ){
-				// Left
-				$tx = $spaces[$key]['x'] - 1;
-				$ty = $spaces[$key]['y'];
-				$tKey = $tx . '_' . $ty; 
-				if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
-					$checkPosX = $tx;
-					$checkPosY = $ty;
-
-
-					break;
-				}
-				// Up
-				$tx = $spaces[$key]['x'];
-                                $ty = $spaces[$key]['y'] - 1;  
-                                $tKey = $tx . '_' . $ty;              
-                                if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
-                                        $checkPosX = $tx;
-                                        $checkPosY = $ty;
-                                        break;
-                                }		 			
-				// Right
-				
-				// Down
-				$tx = $spaces[$key]['x'];
-                                $ty = $spaces[$key]['y'] + 1;
-                                $tKey = $tx . '_' . $ty;
-                                if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
-                                        $checkPosX = $tx;
-                                        $checkPosY = $ty;
-                                        break;
-                                }		
-			}
-		}
-		if($oldCheckPosX == $checkPosX && $oldCheckPosY == $checkPosY){ // No new spot to check found
-			$scaning = false;
-		}
-		$oldCheckPosX = $checkPosX;
-		$oldCheckPosY = $checkPosY;		  
-		$scanCount++;
-		if($scanCount > 950){
-			//$scanning = false;
-		}		
-	}
-	echo "Left fill $s: " . $fillCount . "<br>";
 	
+
+	//
+	// Flood fill free space target. If there is more free space in one direction and a path to it go.
+	//
+	$fillWeight = 2;
+	$spaces = array();
+	$checkPosX = $x - 1;
+        $checkPosY = $y;	
+	$leftFill = floodFill( $state, $checkPosX, $checkPosY, 0, $spaces );
+	$spaces = array();
+        $checkPosX = $x;
+        $checkPosY = $y - 1;
+        $upFill = floodFill( $state, $checkPosX, $checkPosY, 1, $spaces );
+	$spaces = array();
+        $checkPosX = $x + 1;
+        $checkPosY = $y;
+        $rightFill = floodFill( $state, $checkPosX, $checkPosY, 2, $spaces );
+	$spaces = array();
+        $checkPosX = $x;
+        $checkPosY = $y + 1;
+        $downFill = floodFill( $state, $checkPosX, $checkPosY, 3, $spaces );
+	$avoidLeft = false;
+	$avoidUp = false;
+	$avoidRight = false;
+	$avoidDown = false; 
+	$snakeLength = count($state['snakes'][$s]['tails']) + 1;
+	if( $leftFill > 0 && $leftFill <= count($state['snakes'][$s]['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
+		//$fillWeight = 50; 
+		$avoidLeft = true;
+	}
+	if( $upFull > 0 && $upFill <= count($state['snakes'][$s]['tails']) * 2 ){
+		//$fillWeight = 50;
+		$avoidUp = true;
+	} 
+	if( $rightFill > 0 && $rightFill <= count($state['snakes'][$s]['tails']) * 2 ){
+		//$fillWeight = 50;
+		$avoidRight = true;
+	}
+	if( $downFill > 0 && $downFill <= count($state['snakes'][$s]['tails']) * 2 ){
+		//$fillWeight = 50;
+		$avoidDown = true;
+	}
+
+	if ($left && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
+		$targetLeft += 50;
+		echo ".";
+	}
+	if ($up && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
+                $targetUp += 50;
+        	echo ".";
+	}
+	if ($right && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
+                $targetRight += 50;
+        	echo ".";
+	}	
+	if ($down && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
+                $targetDown += 50;
+        	echo ".";
+	}
+	/*
+	$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
+        arsort($directions);
+        reset($directions);
+        $bestKey = key($directions);
+        $bestValue = $directions[$bestKey];
+        asort($directions);
+        reset($directions);
+        $worstKey = key($directions);
+        $worstValue = $directions[$worstKey];
+        //echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
+        if($bestValue > 0 && $bestValue > $worstValue){
+                if($bestKey == 'left' && $left){
+                        $targetLeft += $fillWeight;
+                }
+                if($bestKey == 'up' && $up){
+                        $targetUp += $fillWeight;
+                }
+                if($bestKey == 'right' && $right){
+                        $targetRight += $fillWeight;
+                }
+                if($bestKey == 'down' && $down){
+                        $targetDown += $fillWeight;
+                }
+        }
+	*/
+ 
+	//echo "Fill  $s    x: $checkPosX y: $checkPosY   l: " . $leftFill  . " up $upFill  right: $rightFill  down: $downFill <br>";
+	
+
 
 	// Head in direction of best target if it is > 0 and > worst target. 
 	//I.e. if they are all the same skip and choose randomly later.
@@ -469,6 +489,85 @@ function getDirection( $state, $s ){
 	if($left){return 0;} if($up){return 1;} if($right){return 2;} if($down){return 3;}
 	if( rand(0, 1) == 1 ){return 1;} // Go up
 	return 3; // No other option? Just go down town. Thats what I would do.
+}
+
+
+/**
+* floodFill
+*
+* Description: Check tiles in one direction to see how many open are connected.
+*/
+function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth = 0 ){
+	if($depth > 400){
+		return 0;
+	}
+	$oldCheckPosX = $checkPosX;
+	$oldCheckPosY = $checkPosY;
+	$fillCount = 0;
+	$key = $checkPosX . '_' . $checkPosY;
+		if(array_key_exists($key, $spaces)){
+			return 0;
+		}
+
+		$isEmpty = false;
+		if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
+			$fillCount++;
+			$isEmpty = true;
+		}
+		$spaces[$key] = array('open' => $isEmpty, 'x' => $checkPosX, 'y' => $checkPosY);
+		//echo " scan ". $key. "  o: $isEmpty    d $depth    <br>";	
+		// Find next pos to scan 
+		$i = 0;
+			//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
+			if( $spaces[$key]['open'] == true ){
+				// Left
+				if($direction != 2){
+				$tx = $spaces[$key]['x'] - 1;
+				$ty = $spaces[$key]['y'];
+				$tKey = $tx . '_' . $ty; 
+				if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+					$checkPosX = $tx;
+					$checkPosY = $ty;
+					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				}
+				}
+				// Up
+				if($direction != 3){
+				$tx = $spaces[$key]['x'];
+				$ty = $spaces[$key]['y'] - 1;  
+				$tKey = $tx . '_' . $ty;              
+				if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+					$checkPosX = $tx;
+					$checkPosY = $ty;
+					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				}		 
+				}			
+				// Right
+				if($direction != 0){
+				$tx = $spaces[$key]['x'] + 1;
+                                $ty = $spaces[$key]['y'];
+                                $tKey = $tx . '_' . $ty;
+                                if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+                                        $checkPosX = $tx;
+                                        $checkPosY = $ty;
+                                        $fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+                                }
+				}	
+			
+				// Down
+				if($direction != 1){
+				$tx = $spaces[$key]['x'];
+				$ty = $spaces[$key]['y'] + 1;
+				$tKey = $tx . '_' . $ty;
+				if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+					$checkPosX = $tx;
+					$checkPosY = $ty;
+					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				}		
+				}
+			}
+	
+	return $fillCount;
 }
 
 function advanceState( $gameState ){
