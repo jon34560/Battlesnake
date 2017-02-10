@@ -1,11 +1,19 @@
 <?php
 
 
-//echo var_dump($_POST);
-//echo "Req" . http_get_request_body();
-echo "R" . var_dump($_REQUEST) . "___";
+$data = json_decode(file_get_contents('php://input'), true);
+//print_r($data);
 
-echo "P" . var_dump($_POST) . "_";
+$year = '2016';
+if($year == '2016'){
+
+	$game = $data['game'];	
+
+	echo "game " . $game . ", ";
+	echo " data " . $data ;
+}
+
+
 
 $data = array( 'move' => 'up', 'taunt' => 'Everyone wins!' );
 

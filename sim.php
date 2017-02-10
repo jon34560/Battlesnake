@@ -2,6 +2,7 @@
 
 $STATE_FILE = "/var/www/magnite.org/game_state.dat";
 $snake_colours = array(1 => '#FF4444', 2 => '#AAAA00', 3 => '#00EE22', 4 => '#2222FF', 5 => '#44EEEE', 6 => '#EE55EE', 7 => '88EE88', 8=> '#4477EE', 9=> '#FF8822');
+$tick_cache = array();
 
 function initaliseGameState( &$gameState ){
 	$state = json_decode( $gameState, true );
@@ -34,12 +35,13 @@ function initaliseGameState( &$gameState ){
 }
 
 function getDirection( $state, $s ){
-	$left = true;
+	global $tick_cache;
+	$left = true; 		// Allowed
 	$up = true;
 	$right = true;
 	$down = true;
 
-	$targetLeft = 0;
+	$targetLeft = 0;	// Prefered
 	$targetUp = 0;
 	$targetRight = 0;
 	$targetDown = 0;
@@ -411,7 +413,7 @@ function getDirection( $state, $s ){
                 $targetDown += 50;
         	echo ".";
 	}
-	/*
+	
 	$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
         arsort($directions);
         reset($directions);
@@ -436,11 +438,15 @@ function getDirection( $state, $s ){
                         $targetDown += $fillWeight;
                 }
         }
-	*/
+	
  
 	//echo "Fill  $s    x: $checkPosX y: $checkPosY   l: " . $leftFill  . " up $upFill  right: $rightFill  down: $downFill <br>";
 	
 
+
+	// 
+	// Update position based on data collected.
+	//
 
 	// Head in direction of best target if it is > 0 and > worst target. 
 	//I.e. if they are all the same skip and choose randomly later.
@@ -498,8 +504,8 @@ function getDirection( $state, $s ){
 * Description: Check tiles in one direction to see how many open are connected.
 */
 function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth = 0 ){
-	$directional = true;
-	if($depth > 400){
+	$directional = false;
+	if($depth > 14){
 		return 0;
 	}
 	$oldCheckPosX = $checkPosX;
@@ -519,10 +525,10 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 		//echo " scan ". $key. "  o: $isEmpty    d $depth    <br>";	
 		// Find next pos to scan 
 		$i = 0;
-			//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
-			if( $spaces[$key]['open'] == true ){
-				// Left
-				if($direction != 2 || !$directional ){
+		//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
+		if( $spaces[$key]['open'] == true ){
+			// Left
+			if($direction != 2 || !$directional ){
 				$tx = $spaces[$key]['x'] - 1;
 				$ty = $spaces[$key]['y'];
 				$tKey = $tx . '_' . $ty; 
@@ -531,9 +537,9 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 					$checkPosY = $ty;
 					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
 				}
-				}
-				// Up
-				if($direction != 3 || !$directional){
+			}
+			// Up
+			if($direction != 3 || !$directional){
 				$tx = $spaces[$key]['x'];
 				$ty = $spaces[$key]['y'] - 1;  
 				$tKey = $tx . '_' . $ty;              
@@ -542,9 +548,9 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 					$checkPosY = $ty;
 					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
 				}		 
-				}			
-				// Right
-				if($direction != 0 || !$directional){
+			}			
+			// Right
+			if($direction != 0 || !$directional){
 				$tx = $spaces[$key]['x'] + 1;
                                 $ty = $spaces[$key]['y'];
                                 $tKey = $tx . '_' . $ty;
@@ -553,10 +559,10 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
                                         $checkPosY = $ty;
                                         $fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
                                 }
-				}	
+			}	
 			
-				// Down
-				if($direction != 1 || !$directional){
+			// Down
+			if($direction != 1 || !$directional){
 				$tx = $spaces[$key]['x'];
 				$ty = $spaces[$key]['y'] + 1;
 				$tKey = $tx . '_' . $ty;
@@ -565,13 +571,16 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 					$checkPosY = $ty;
 					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
 				}		
-				}
 			}
+		}
 	
 	return $fillCount;
 }
 
 function advanceState( $gameState ){
+	global $tick_cache;
+	unset($tick_cache);
+	$tick_cache = array();
 	$state = json_decode( $gameState, true );
 	$state['ticks'] = (int)($state['ticks']) + 1;		
 
@@ -681,7 +690,7 @@ function advanceState( $gameState ){
 
 	// Add food
 	// TODO: don't add on top of an ocupied space.
-	if( $state['ticks'] % 5 == 0 ){
+	if( $state['ticks'] % 4 == 0 ){
 		//echo " ADD FOOD ";
 		$foods = $state['foods'];
 		$foods[count($state['foods'])]['active'] = true;
@@ -711,6 +720,9 @@ function isRangeEmpty( $state, $x1, $y1, $x2, $y2 ){
 }
 
 function isSpaceOnBoard( $state, $x , $y){
+
+	
+
 	if($x < 0){
                 return false;
         }
@@ -727,6 +739,16 @@ function isSpaceOnBoard( $state, $x , $y){
 }
 
 function isSpaceEmpty( $state, $x, $y ){
+	global $tick_cache;
+
+	$key = $x . "_" . $y;
+	if( array_key_exists($key, $tick_cache) ){
+		//echo "-";
+		return $tick_cache[$key];
+	} else {
+		//echo "+";
+	}
+
 	if($x < 0){
 		return false;
 	}
@@ -744,6 +766,7 @@ function isSpaceEmpty( $state, $x, $y ){
 			$state['snakes'][$s]['y'] == $y && 
 			$state['snakes'][$s]['alive'] == true
 		){
+			$tick_cache[$key] = false;
 			return false;	
 		}
 		for( $t = 0; $t < count( $state['snakes'][$s]['tails']); $t++ ){
@@ -751,10 +774,12 @@ function isSpaceEmpty( $state, $x, $y ){
 				$y == $state['snakes'][$s]['tails'][$t]['y'] &&
 				$state['snakes'][$s]['alive'] == true
                 	){
+				$tick_cache[$key] = false;
 				return false;
 			}			
 		}	
-	}	
+	}
+	$tick_cache[$key] = true;	
 	return true;
 }
 
