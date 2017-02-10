@@ -498,6 +498,7 @@ function getDirection( $state, $s ){
 * Description: Check tiles in one direction to see how many open are connected.
 */
 function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth = 0 ){
+	$directional = true;
 	if($depth > 400){
 		return 0;
 	}
@@ -521,7 +522,7 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 			//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
 			if( $spaces[$key]['open'] == true ){
 				// Left
-				if($direction != 2){
+				if($direction != 2 || !$directional ){
 				$tx = $spaces[$key]['x'] - 1;
 				$ty = $spaces[$key]['y'];
 				$tKey = $tx . '_' . $ty; 
@@ -532,7 +533,7 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 				}
 				}
 				// Up
-				if($direction != 3){
+				if($direction != 3 || !$directional){
 				$tx = $spaces[$key]['x'];
 				$ty = $spaces[$key]['y'] - 1;  
 				$tKey = $tx . '_' . $ty;              
@@ -543,7 +544,7 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 				}		 
 				}			
 				// Right
-				if($direction != 0){
+				if($direction != 0 || !$directional){
 				$tx = $spaces[$key]['x'] + 1;
                                 $ty = $spaces[$key]['y'];
                                 $tKey = $tx . '_' . $ty;
@@ -555,7 +556,7 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 				}	
 			
 				// Down
-				if($direction != 1){
+				if($direction != 1 || !$directional){
 				$tx = $spaces[$key]['x'];
 				$ty = $spaces[$key]['y'] + 1;
 				$tKey = $tx . '_' . $ty;
