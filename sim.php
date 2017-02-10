@@ -502,6 +502,8 @@ function getDirection( $state, $s ){
 * floodFill
 *
 * Description: Check tiles in one direction to see how many open are connected.
+*
+* Optimization: Don't search farther than we have to... 
 */
 function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth = 0 ){
 	$directional = false;
@@ -512,9 +514,10 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 	$oldCheckPosY = $checkPosY;
 	$fillCount = 0;
 	$key = $checkPosX . '_' . $checkPosY;
-		if(array_key_exists($key, $spaces)){
-			return 0;
-		}
+		
+	if(array_key_exists($key, $spaces)){
+		return 0;
+	}
 
 		$isEmpty = false;
 		if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
@@ -720,53 +723,82 @@ function isRangeEmpty( $state, $x1, $y1, $x2, $y2 ){
 }
 
 function isSpaceOnBoard( $state, $x , $y){
+	global $tick_cache;
 
-	
+	$key = "" . $x . "_" . $y . "b";
+        /*
+	if( array_key_exists($key, $tick_cache) ){ // Bad performance
+                //echo "-";
+                return $tick_cache[$key];
+        } else {
+                //echo "+";
+        }
+	*/
+	$result = $tick_cache[$key];
+	if($result == 't'){
+		//echo ".";
+		return true;
+	} else if($result == 'f'){
+		//echo ".";
+		return false;
+	} else {
+		//echo "+";
+	}
 
 	if($x < 0){
+		$tick_cache[$key] = 'f'; //false;
                 return false;
         }
         if($y < 0){
+		$tick_cache[$key] = 'f'; //false;
                 return false;
         }
         if($x > ($state['board_width'] - 1)){
+		$tick_cache[$key] = 'f'; //false;
                 return false;
         }
         if($y > ($state['board_height'] - 1)){
+		$tick_cache[$key] = 'f'; //false;
                 return false;
         }
+	$tick_cache[$key] = 't'; //true;
 	return true;	
 }
 
 function isSpaceEmpty( $state, $x, $y ){
 	global $tick_cache;
 
-	$key = $x . "_" . $y;
-	if( array_key_exists($key, $tick_cache) ){
+	$key = $x . "_" . $y . "e";
+	//if( array_key_exists($key, $tick_cache) ){
 		//echo "-";
-		return $tick_cache[$key];
+	//	return $tick_cache[$key];
+	//} else {
+		//echo "+";
+	//}
+
+	$result = $tick_cache[$key];
+	if($result == 't'){
+		//echo ".";
+		return true;
+	} else if($result == 'f'){
+		//echo ".";
+		return false;
 	} else {
 		//echo "+";
 	}
+ 
 
-	if($x < 0){
-		return false;
+	if(!isSpaceOnBoard( $state, $x , $y)){
+		$tick_cache[$key] = 'f'; // false;
+		return false;	
 	}
-	if($y < 0){
-		return false;
-	}
-	if($x > ($state['board_width'] - 1)){
-		return false;
-	}
-	if($y > ($state['board_height'] - 1)){
-		return false;
-	}
+
 	for( $s = 0; $s < count($state['snakes']); $s++ ){
                 if( $state['snakes'][$s]['x'] == $x && 
 			$state['snakes'][$s]['y'] == $y && 
 			$state['snakes'][$s]['alive'] == true
 		){
-			$tick_cache[$key] = false;
+			$tick_cache[$key] = 'f'; //false;
 			return false;	
 		}
 		for( $t = 0; $t < count( $state['snakes'][$s]['tails']); $t++ ){
@@ -774,12 +806,12 @@ function isSpaceEmpty( $state, $x, $y ){
 				$y == $state['snakes'][$s]['tails'][$t]['y'] &&
 				$state['snakes'][$s]['alive'] == true
                 	){
-				$tick_cache[$key] = false;
+				$tick_cache[$key] = 'f'; // false;
 				return false;
 			}			
 		}	
 	}
-	$tick_cache[$key] = true;	
+	$tick_cache[$key] = 't'; //true;	
 	return true;
 }
 
