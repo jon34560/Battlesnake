@@ -36,7 +36,61 @@ function initaliseGameState( &$gameState ){
 	return $gameState;
 }
 
-function getDirection( & $state, $s ){
+// 2016 API
+function loadGameState ( $data ){
+	$state = array();
+	$state['board_width'] = $data['width'];
+        $state['board_height'] = $data['height'];
+	$state['ticks'] = $data['turn'];
+	$state['s'] = '';
+
+	$snakes = array();
+	for($s = 0; $s < count( $data['snakes'] ); $s++){
+		// id, name status message taunt age health, coords []  kills  food gold
+		$tails = array();		
+		for( $p = 0; $p < count($data['snakes'][$s]['coords']); $p++ ){
+			$x = $data['snakes'][$s]['coords'][$p][0];
+			$y = $data['snakes'][$s]['coords'][$p][1]; 
+			//echo " coord " . $x . " " . $y  ;
+			if($p == 0){
+				$snakes[$s]['x'] = $x;
+				$snakes[$s]['y'] = $y;
+			} else {
+				$tails[ ($p - 1) ]['x'] = $x;
+				$tails[ ($p - 1) ]['y'] = $y;	
+			}
+		}
+		$snakes[$s]['health'] = $data['snakes'][$s]['health'];	
+		$snakes[$s]['alive'] = ( $data['snakes'][$s]['health'] > 0 ? true : false );
+		$snakes[$s]['log'] = '';
+		$snakes[$s]['reason'] = '';		
+		$snakes[$s]['tails'] = $tails;
+
+		// Identify my snake
+		if($data['snakes'][$s]['name'] == 'Jon' ){
+			$state['s'] = $s;
+		}	
+	}	
+	$state['snakes'] = $snakes;
+
+	$foods = array();
+	for($f = 0; $f < count( $data['food'] ); $f++){
+		$x = $data['food'][$f][0];
+		$y = $data['food'][$f][1];
+		//echo " " . $x .  " " . $y ;
+		$foods[$f]['x'] = $x;
+		$foods[$f]['y'] = $y;
+		$foods[$f]['active'] = true;
+	}
+	$state['foods'] = $foods;	
+
+
+	$gameState = json_encode( (array)$state );
+	//echo " json " . $gameState;
+	return $gameState;	
+}
+
+function getDirection( & $state, $s, $debug = true ){
 	global $tick_cache;
 	$left = true; 		// Allowed
 	$up = true;
@@ -160,12 +214,14 @@ function getDirection( & $state, $s ){
                                 }
                         }
 	}
-	$state['snakes'][$s]['reason'] .= 'Allowed   '.
-		' l: '. ($left?'<b><font color=green><</font></b>':'<font color=red><</font>').
-		' u: '.($up?'<b><font color=green>/\</font></b>':'<font color=red>/\</font>').
-		' r: '.($right?'<b><font color=green>></font></b>':'<font color=red>></font>').
-		' d: '.($down?'<b><font color=green>\/</font></b>':'<font color=red>\/</font>').' <br>';
 
+	if($debug){	
+		$state['snakes'][$s]['reason'] .= 'Allowed   '.
+			' l: '. ($left?'<b><font color=green><</font></b>':'<font color=red><</font>').
+			' u: '.($up?'<b><font color=green>/\</font></b>':'<font color=red>/\</font>').
+			' r: '.($right?'<b><font color=green>></font></b>':'<font color=red>></font>').
+			' d: '.($down?'<b><font color=green>\/</font></b>':'<font color=red>\/</font>').' <br>';
+	}
 
 	
 	// Goal, head in direction of 1) free space and 2) food 
@@ -204,7 +260,9 @@ function getDirection( & $state, $s ){
 				}
 				if($clear && $left){
 					$targetLeft += $weight;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Left '.$weight.' <br>';
+					if($debug){
+						$state['snakes'][$s]['reason'] .= 'Linear Food Left '.$weight.' <br>';
+					}
 				}
 			}
 			if( $state['snakes'][$s]['x'] == $state['foods'][$f]['x'] && 
@@ -220,7 +278,9 @@ function getDirection( & $state, $s ){
                                 }
                                 if($clear && $up){
 					$targetUp += $weight;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Up  '.$weight.' <br>';
+					if($debug){
+						$state['snakes'][$s]['reason'] .= 'Linear Food Up  '.$weight.' <br>';
+					}
 				}
 			}	
 			if( $state['snakes'][$s]['x'] + $v == $state['foods'][$f]['x'] && 
@@ -236,7 +296,9 @@ function getDirection( & $state, $s ){
                                 }
                                 if($clear && $right){	
 					$targetRight += $weight;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Right  '.$weight.' <br>';
+					if($debug){
+						$state['snakes'][$s]['reason'] .= 'Linear Food Right  '.$weight.' <br>';
+					}
 				}
 			} 
 			if( $state['snakes'][$s]['x']  == $state['foods'][$f]['x'] && 
@@ -252,7 +314,9 @@ function getDirection( & $state, $s ){
                                 }
                                 if($clear && $down){
 					$targetDown += $weight;
-					$state['snakes'][$s]['reason'] .= 'Linear Food Down  '.$weight.' <br>';
+					if($debug){
+						$state['snakes'][$s]['reason'] .= 'Linear Food Down  '.$weight.' <br>';
+					}
 				}
 			}	
 		}	
@@ -297,18 +361,26 @@ function getDirection( & $state, $s ){
 		if( abs($xDir) > abs($yDir) ){ // horizontal
 			if( $xDir < 0 && $left){
 				$targetLeft += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Left '.$dirWeight.' <br>';
+				if($debug){
+					$state['snakes'][$s]['reason'] .= 'Angle Food Left '.$dirWeight.' <br>';
+				}
 			} else if($right) {
 				$targetRight += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Right '.$dirWeight.' <br>';
+				if($debug){
+					$state['snakes'][$s]['reason'] .= 'Angle Food Right '.$dirWeight.' <br>';
+				}
 			}
 		} else {			// Vertical
 			if( $yDir < 0 && $up ){
 				$targetUp += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Up  '.$dirWeight.' <br>';
+				if($debug){
+					$state['snakes'][$s]['reason'] .= 'Angle Food Up  '.$dirWeight.' <br>';
+				}
 			} else if($down) {
 				$targetDown += $dirWeight;
-				$state['snakes'][$s]['reason'] .= 'Angle Food Down  '.$dirWeight.' <br>';
+				if($debug){
+					$state['snakes'][$s]['reason'] .= 'Angle Food Down  '.$dirWeight.' <br>';
+				}
 			}
 		}
 	}
@@ -360,20 +432,28 @@ function getDirection( & $state, $s ){
 
 		if($bestKey == 'left' && $left){
 			$targetLeft += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Left '.$spaceWeight.' <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Linear Space Left '.$spaceWeight.' <br>';
+			}
 		}
 		if($bestKey == 'up' && $up){
 			$targetUp += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Up '.$spaceWeight.' <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Linear Space Up '.$spaceWeight.' <br>';
+			}
 		}
 		if($bestKey == 'right' && $right){
                         $targetRight += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Right '.$spaceWeight.' <br>';
-                }	
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Linear Space Right '.$spaceWeight.' <br>';
+                	}
+		}	
 		if($bestKey == 'down' && $down){
                         $targetDown += $spaceWeight;
-			$state['snakes'][$s]['reason'] .= 'Linear Space Down '.$spaceWeight.' <br>';
-                }	
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Linear Space Down '.$spaceWeight.' <br>';
+                	}
+		}	
 	}
 	
 
@@ -381,68 +461,86 @@ function getDirection( & $state, $s ){
 	// Flood fill free space target. If there is more free space in one direction and a path to it go.
 	//
 	$fillWeight = 12; // 2; // 12 is better than 2
-	$spaces = array();
+	$leftSpaces = array();
 	$checkPosX = $x - 1;
         $checkPosY = $y;	
-	$leftFill = floodFill( $state, $checkPosX, $checkPosY, 0, $spaces );
-	$spaces = array();
+	$leftFill = floodFill( $state, $checkPosX, $checkPosY, 0, $leftSpaces );
+	$upSpaces = array();
         $checkPosX = $x;
         $checkPosY = $y - 1;
-        $upFill = floodFill( $state, $checkPosX, $checkPosY, 1, $spaces );
-	$spaces = array();
+        $upFill = floodFill( $state, $checkPosX, $checkPosY, 1, $upSpaces );
+	$rightSpaces = array();
         $checkPosX = $x + 1;
         $checkPosY = $y;
-        $rightFill = floodFill( $state, $checkPosX, $checkPosY, 2, $spaces );
-	$spaces = array();
+        $rightFill = floodFill( $state, $checkPosX, $checkPosY, 2, $rightSpaces );
+	$downSpaces = array();
         $checkPosX = $x;
         $checkPosY = $y + 1;
-        $downFill = floodFill( $state, $checkPosX, $checkPosY, 3, $spaces );
+        $downFill = floodFill( $state, $checkPosX, $checkPosY, 3, $downSpaces );
 	$avoidLeft = false;
 	$avoidUp = false;
 	$avoidRight = false;
 	$avoidDown = false; 
 	$snakeLength = count($state['snakes'][$s]['tails']) + 1;
-	$state['snakes'][$s]['reason'] .= 'Flood Fill l:' . $leftFill . ' u:' . $upFill . ' r:'. $rightFill . ' d:' . $downFill . '<br>';
+	if($debug){
+		$state['snakes'][$s]['reason'] .= 'Flood Fill l:' . $leftFill . ' u:' . $upFill . ' r:'. $rightFill . ' d:' . $downFill . '<br>';
+	}
 	if( $leftFill > 0 && $leftFill <= count($state['snakes'][$s]['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
 		//$fillWeight = 50; 
 		$avoidLeft = true;
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
+		}
 	}
 	if( $upFull > 0 && $upFill <= count($state['snakes'][$s]['tails']) * 2 ){
 		//$fillWeight = 50;
 		$avoidUp = true;
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
+		}
 	} 
 	if( $rightFill > 0 && $rightFill <= count($state['snakes'][$s]['tails']) * 2 ){
 		//$fillWeight = 50;
 		$avoidRight = true;
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
+		}
 	}
 	if( $downFill > 0 && $downFill <= count($state['snakes'][$s]['tails']) * 2 ){
 		//$fillWeight = 50;
 		$avoidDown = true;
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Down <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Down <br>';
+		}
 	}
 
 	if ($left && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
 		$targetLeft += 50;
 		//echo ".";
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Left Panic <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Target Left Panic <br>';
+		}
 	}
 	if ($up && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
                 $targetUp += 50;
         	//echo ".";
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Up Panic <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Target Up Panic <br>';
+		}
 	}
 	if ($right && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
                 $targetRight += 50;
         	//echo ".";
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Right Panic <br>';	
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Target Right Panic <br>';	
+		}
 	}	
 	if ($down && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
                 $targetDown += 50;
         	//echo ".";
-		$state['snakes'][$s]['reason'] .= 'Flood Fill Target Down Panic <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Flood Fill Target Down Panic <br>';
+		}
 	}
 	
 	$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
@@ -458,24 +556,51 @@ function getDirection( & $state, $s ){
         if($bestValue > 0 && $bestValue > $worstValue){
                 if($bestKey == 'left' && $left){
                         $targetLeft += $fillWeight;
-			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Left '.$fillWeight.' <br>';
-                }
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Left '.$fillWeight.' <br>';
+                	}
+		}
                 if($bestKey == 'up' && $up){
                         $targetUp += $fillWeight;
-			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Up '.$fillWeight.' <br>';
-                }
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Up '.$fillWeight.' <br>';
+                	}
+		}
                 if($bestKey == 'right' && $right){
                         $targetRight += $fillWeight;
-			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Right '.$fillWeight.' <br>';
-                }
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Right '.$fillWeight.' <br>';
+                	}
+		}
                 if($bestKey == 'down' && $down){
                         $targetDown += $fillWeight;
-			$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Down '.$fillWeight.' <br>';
-                }
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Down '.$fillWeight.' <br>';
+                	}
+		}
         }
-	
- 
-	//echo "Fill  $s    x: $checkPosX y: $checkPosY   l: " . $leftFill  . " up $upFill  right: $rightFill  down: $downFill <br>";
+
+
+	// Anticipate intent of other bots.
+	// 1) If an opponent head is one position from blocking a path, avoid direction. 
+	// $leftSpaces   analyse path to determine how narrow is is and then if heads are close on edge.
+	$keys = array_keys($leftSpaces);
+	for($i = 0; $i < count($keys); $i++){
+		$space = $leftSpaces[ $keys[$i] ];
+		//if($space['open'] == true){
+			//$distance = $space['x']
+			//echo "." . $space['x'];
+		//}
+		if($space['open'] == false){
+			if( isSpaceSnakeHead( $state, $space['x'], $space['y']) && $x - 1 == $space['x'] ){ // One spot over, head is close.
+				echo " " . $s . " ( ".$space['x'] . ", ". $space['y'] . " ) ";
+			}			
+		}	
+	}
+
+
+	// Murder Bot, Cut off other bots 
+	// 1) If an opponent is confined in a space and you can cut him off and escape do so.
 	
 
 
@@ -498,19 +623,27 @@ function getDirection( & $state, $s ){
 	//echo " Target best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>";	
 	if($bestValue > 0 && $bestValue > $worstValue){
 		if($bestKey == 'left' && $left){
-			$state['snakes'][$s]['reason'] .= 'Choose Left  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Left  <br>';
+			}
 			return 0; // Go left
 		}	
 		if($bestKey == 'up' && $up){
-			$state['snakes'][$s]['reason'] .= 'Choose Up  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Up  <br>';
+			}
 			return 1; // Go up
 		}
 		if($bestKey == 'right' && $right){
-			$state['snakes'][$s]['reason'] .= 'Choose Right  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Right  <br>';
+			}
 			return 2; // Go Right
 		}
 		if($bestKey == 'down' && $down){
-			$state['snakes'][$s]['reason'] .= 'Choose Down  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Down  <br>';
+			}
 			return 3; // Go Down
 		}
 	}
@@ -519,36 +652,52 @@ function getDirection( & $state, $s ){
 	for($i = 0; $i < 10; $i++ ){ // Bit of a hack
 		$dir = rand(0, 3);
 		if($dir == 0 && $left){
-			$state['snakes'][$s]['reason'] .= 'Choose Random Left  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Random Left  <br>';
+			}
 			return 0;
 		} 
 		if($dir == 1 && $up){
-			$state['snakes'][$s]['reason'] .= 'Choose Random Up  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Random Up  <br>';
+			}
 			return 1;
 		}
 		if($dir == 2 && $right){
-			$state['snakes'][$s]['reason'] .= 'Choose Random Right  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Random Right  <br>';
+			}
 			return 2;
 		}
 		if($dir == 3 && $down){
-			$state['snakes'][$s]['reason'] .= 'Choose Random Down  <br>';
+			if($debug){
+				$state['snakes'][$s]['reason'] .= 'Choose Random Down  <br>';
+			}
 			return 3;
 		}
 	}
 	if($left){
-		$state['snakes'][$s]['reason'] .= 'Go Left  <br>';	
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Go Left  <br>';	
+		}
 		return 0;
 	} 
 	if($up){
-		$state['snakes'][$s]['reason'] .= 'Go Up  <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Go Up  <br>';
+		}
 		return 1;
 	} 
 	if($right){
-		$state['snakes'][$s]['reason'] .= 'Go Right  <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Go Right  <br>';
+		}
 		return 2;
 	} 
 	if($down){
-		$state['snakes'][$s]['reason'] .= 'Go Down  <br>';
+		if($debug){
+			$state['snakes'][$s]['reason'] .= 'Go Down  <br>';
+		}
 		return 3;
 	}
 	if( rand(0, 1) == 1 ){return 1;} // Go up
@@ -577,28 +726,28 @@ function floodFill( $state, $checkPosX, $checkPosY, $direction, &$spaces, $depth
 		return 0;
 	}
 
-		$isEmpty = false;
-		if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
-			$fillCount++;
-			$isEmpty = true;
-		}
-		$spaces[$key] = array('open' => $isEmpty, 'x' => $checkPosX, 'y' => $checkPosY);
-		//echo " scan ". $key. "  o: $isEmpty    d $depth    <br>";	
-		// Find next pos to scan 
-		$i = 0;
-		//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
-		if( $spaces[$key]['open'] == true ){
-			// Left
-			if($direction != 2 || !$directional ){
-				$tx = $spaces[$key]['x'] - 1;
-				$ty = $spaces[$key]['y'];
-				$tKey = $tx . '_' . $ty; 
-				if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
-					$checkPosX = $tx;
-					$checkPosY = $ty;
-					$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
-				}
+	$isEmpty = false;
+	if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
+		$fillCount++;
+		$isEmpty = true;
+	}
+	$spaces[$key] = array('open' => $isEmpty, 'x' => $checkPosX, 'y' => $checkPosY);
+	//echo " scan ". $key. "  o: $isEmpty    d $depth    <br>";	
+	// Find next pos to scan 
+	$i = 0;
+	//echo " . " . "  " . $i . " : " . count($spaces ) . "<br>";
+	if( $spaces[$key]['open'] == true ){
+		// Left
+		if($direction != 2 || !$directional ){
+			$tx = $spaces[$key]['x'] - 1;
+			$ty = $spaces[$key]['y'];
+			$tKey = $tx . '_' . $ty; 
+			if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+				$checkPosX = $tx;
+				$checkPosY = $ty;
+				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
 			}
+		}
 			// Up
 			if($direction != 3 || !$directional){
 				$tx = $spaces[$key]['x'];
@@ -877,6 +1026,21 @@ function isSpaceEmpty( $state, $x, $y ){
 	}
 	$tick_cache[$key] = 't'; //true;	
 	return true;
+}
+
+function isSpaceSnakeHead( $state, $x, $y ){
+	
+	for( $s = 0; $s < count($state['snakes']); $s++ ){
+                if($state['snakes'][$s]['alive'] == true){
+                        if( $state['snakes'][$s]['x'] == $x &&
+                                $state['snakes'][$s]['y'] == $y
+			){
+
+				return true;
+			}
+		}
+	}
+	return false;
 }
 
 function snakesAlive( $gameState ){
