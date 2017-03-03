@@ -24,6 +24,7 @@ Collision::selfCollisionDetection($state, $decision_matix);
 Collision::snakeCollisionDetection($state, $decision_matix);
 
 Food::linearFoodSearch($state, $decision_matix);
+Food::angleFoodSearch($state, $decision_matix);
 
 error_log(print_r('Decision', true), 0);
 error_log(print_r($decision_matix->firstValidDirection(), true), 0);
