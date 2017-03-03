@@ -115,42 +115,36 @@ class FreeSpace
 		$snakeLength = count($my_snake['tails']) + 1;
 		if( $leftFill > 0 && $leftFill <= count($my_snake['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
 			$avoidLeft = true;
-			//if($debug){
-			//	$my_snake['reason'] .= 'Flood Fill Avoid Left <br>';
-			//}
 		}
 		if( $upFill > 0 && $upFill <= count($my_snake['tails']) * 2 ){
 			$avoidUp = true;
-			//if($debug){
-			//	$my_snake['reason'] .= 'Flood Fill Avoid Up <br>';
-			//}
 		} 
 		if( $rightFill > 0 && $rightFill <= count($my_snake['tails']) * 2 ){
 			$avoidRight = true;
-			//if($debug){
-			//	$my_snake['reason'] .= 'Flood Fill Avoid Right <br>';
-			//}
 		}
 		if( $downFill > 0 && $downFill <= count($my_snake['tails']) * 2 ){
 			$avoidDown = true;
 		}
+
+		// If one direction is good and one or more other directions are bad, increase the priority.
 		if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
-      $decision_matix->incrementPreferedDirectionValue('left', 50);
+      		$decision_matix->incrementPreferedDirectionValue('left', 50);
 			//$targetLeft += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('up') && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
-      $decision_matix->incrementPreferedDirectionValue('up', 50);
+      		$decision_matix->incrementPreferedDirectionValue('up', 50);
 			//$targetUp += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('right') && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
-      $decision_matix->incrementPreferedDirectionValue('right', 50);
-      //$targetRight += 50;
+      		$decision_matix->incrementPreferedDirectionValue('right', 50);
+      		//$targetRight += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
-      $decision_matix->incrementPreferedDirectionValue('down', 50);
-      //$targetDown += 50;
+      		$decision_matix->incrementPreferedDirectionValue('down', 50);
+      		//$targetDown += 50;
 		}
 		
+		// Chose direction based on direction counts found.
 		$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
 		arsort($directions);
 		reset($directions);
