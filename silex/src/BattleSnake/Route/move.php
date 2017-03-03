@@ -11,7 +11,7 @@ use BattleSnake\Logic\Board\Board;
 use BattleSnake\Logic\Collision\Collision;
 use BattleSnake\Logic\FreeSpace\FreeSpace;
 use BattleSnake\Logic\Snake\DecisionMatrix;
-use BattleSnake\Logic\Snake\Food;
+use BattleSnake\Logic\Food\Food;
 use BattleSnake\Logic\Snake\Snake;
 use BattleSnake\Util\Util;
 
