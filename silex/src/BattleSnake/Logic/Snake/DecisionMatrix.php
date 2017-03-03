@@ -27,6 +27,9 @@ class DecisionMatrix
     // Cache Board state
     private $_tick_cache = [];
 
+    // Timestamp 
+    private $_time_stamp = 0;
+
     // Allowed Directions
     public function getAllowedDirections() {
         return $this->_allowed_direction;
@@ -77,10 +80,45 @@ class DecisionMatrix
 
     // Other
     public function firstValidDirection() {
-        foreach ($this->_allowed_direction as $direction => $boolean) {
-            if ($boolean) {
-                return $direction;
-            }
+
+      // Choose direction of best target if it is > 0 and > worst target. 
+      // I.e. if they are all the same skip and choose randomly later.
+      // IDEA: if we can't go in one direction we should give higher preference to allowable dirs
+      $targets = array( 'left' => $this->_prefered_direction['left'], 
+        'up' => $this->_prefered_direction['up'], 
+        'right' => $this->_prefered_direction['right'], 
+        'down' => $this->_prefered_direction['down'] );
+      arsort($targets);
+      reset($targets);
+      $bestKey = key($targets);
+      $bestValue = $targets[$bestKey];
+      asort($targets);
+      reset($targets);
+      $worstKey = key($targets);
+      $worstValue = $targets[$worstKey];
+      if($bestValue > 0 && $bestValue > $worstValue){
+        if($bestKey == 'left' && $this->_allowed_direction['left']){
+          return 'left'; // Go left
+        } 
+        if($bestKey == 'up' && $this->_allowed_direction['up']){
+          return 'up'; // Go up
         }
+        if($bestKey == 'right' && $this->_allowed_direction['right']){
+          return 'right'; // Go Right
+        }
+        if($bestKey == 'down' && $this->_allowed_direction['down']){
+          return 'down'; // Go Down
+        }
+      }
+
+      // Choose an allowed direction
+      foreach ($this->_allowed_direction as $direction => $boolean) {
+        if ($boolean) {
+          return $direction;
+        }
+      }
+
+      // Worst case
+      //return 'down'; 
     }
 }
