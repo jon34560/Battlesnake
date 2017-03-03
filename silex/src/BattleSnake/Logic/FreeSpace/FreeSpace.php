@@ -114,42 +114,43 @@ class FreeSpace
 		$avoidRight = false;
 		$avoidDown = false;
 
-		$snakeLength = count($state['snakes'][$s]['tails']) + 1;
-		if($debug){
-			$state['snakes'][$s]['reason'] .= 'Flood Fill l:' . $leftFill . ' u:' . $upFill . ' r:'. $rightFill . ' d:' . $downFill . '<br>';
-		}
-		if( $leftFill > 0 && $leftFill <= count($state['snakes'][$s]['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
+		$snakeLength = count($my_snake['tails']) + 1;
+		if( $leftFill > 0 && $leftFill <= count($my_snake['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
 			$avoidLeft = true;
 			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
+			//	$my_snake['reason'] .= 'Flood Fill Avoid Left <br>';
 			//}
 		}
-		if( $upFull > 0 && $upFill <= count($state['snakes'][$s]['tails']) * 2 ){
+		if( $upFill > 0 && $upFill <= count($my_snake['tails']) * 2 ){
 			$avoidUp = true;
 			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
+			//	$my_snake['reason'] .= 'Flood Fill Avoid Up <br>';
 			//}
 		} 
-		if( $rightFill > 0 && $rightFill <= count($state['snakes'][$s]['tails']) * 2 ){
+		if( $rightFill > 0 && $rightFill <= count($my_snake['tails']) * 2 ){
 			$avoidRight = true;
 			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
+			//	$my_snake['reason'] .= 'Flood Fill Avoid Right <br>';
 			//}
 		}
-		if( $downFill > 0 && $downFill <= count($state['snakes'][$s]['tails']) * 2 ){
+		if( $downFill > 0 && $downFill <= count($my_snake['tails']) * 2 ){
 			$avoidDown = true;
 		}
-		if ($left && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
-			$targetLeft += 50;
+		if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
+      $decision_matix->incrementPreferedDirectionValue('left', 50);
+			//$targetLeft += 50;
 		}
-		if ($up && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
-			$targetUp += 50;
+		if ($decision_matix->getAllowedDirectionValue('up') && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
+      $decision_matix->incrementPreferedDirectionValue('up', 50);
+			//$targetUp += 50;
 		}
-		if ($right && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
-			$targetRight += 50;
-		}	
-		if ($down && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
-			$targetDown += 50;
+		if ($decision_matix->getAllowedDirectionValue('right') && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
+      $decision_matix->incrementPreferedDirectionValue('right', 50);
+      //$targetRight += 50;
+		}
+		if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
+      $decision_matix->incrementPreferedDirectionValue('sown', 50);
+      //$targetDown += 50;
 		}
 		
 		$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
@@ -163,19 +164,19 @@ class FreeSpace
 		$worstValue = $directions[$worstKey];
 		//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
         if($bestValue > 0 && $bestValue > $worstValue){
-			if($bestKey == 'left' && $left){
+			if($bestKey == 'left' && $decision_matix->getAllowedDirectionValue('left')){
 				//$targetLeft += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('left', $fillWeight);
 			}
-			if($bestKey == 'up' && $up){
+			if($bestKey == 'up' && $decision_matix->getAllowedDirectionValue('up')){
 				//$targetUp += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('up', $fillWeight);
 			}
-			if($bestKey == 'right' && $right){
+			if($bestKey == 'right' && $decision_matix->getAllowedDirectionValue('right')){
 				//$targetRight += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('right', $fillWeight);
 			}
-			if($bestKey == 'down' && $down){
+			if($bestKey == 'down' && $decision_matix->getAllowedDirectionValue('down')){
 				//$targetDown += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('down', $fillWeight);
 			}
@@ -220,7 +221,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1 );
 			}
 			
 			// Up
@@ -230,7 +231,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1 );
 			}		 
 				
 			// Right
@@ -240,7 +241,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1 );
 			}
 			
 			// Down
@@ -250,7 +251,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1 );
 			}		
 		}
 		return $fillCount;
