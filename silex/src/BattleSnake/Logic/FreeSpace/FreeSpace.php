@@ -100,22 +100,26 @@ class FreeSpace
 	*/
 	public static function floodFillDetection($state, $decision_matix) {
 		$fillWeight = 12; // 2; // 12 is better than 2
+
+		$x = $my_snake['x'];
+        $y = $my_snake['y'];
+
 		$leftSpaces = array();
 		$checkPosX = $x - 1;
 		$checkPosY = $y;
-		$leftFill = floodFill( $state, $checkPosX, $checkPosY, 0, $leftSpaces );
+		$leftFill = floodFill( $state, $checkPosX, $checkPosY, $leftSpaces );
 		$upSpaces = array();
 		$checkPosX = $x;
 		$checkPosY = $y - 1;
-		$upFill = floodFill( $state, $checkPosX, $checkPosY, 1, $upSpaces );
+		$upFill = floodFill( $state, $checkPosX, $checkPosY, $upSpaces );
 		$rightSpaces = array();
 		$checkPosX = $x + 1;
 		$checkPosY = $y;
-		$rightFill = floodFill( $state, $checkPosX, $checkPosY, 2, $rightSpaces );
+		$rightFill = floodFill( $state, $checkPosX, $checkPosY, $rightSpaces );
 		$downSpaces = array();
 		$checkPosX = $x;
 		$checkPosY = $y + 1;
-		$downFill = floodFill( $state, $checkPosX, $checkPosY, 3, $downSpaces );
+		$downFill = floodFill( $state, $checkPosX, $checkPosY, $downSpaces );
 		
 		$avoidLeft = false;
 		$avoidUp = false;
@@ -127,60 +131,37 @@ class FreeSpace
 			$state['snakes'][$s]['reason'] .= 'Flood Fill l:' . $leftFill . ' u:' . $upFill . ' r:'. $rightFill . ' d:' . $downFill . '<br>';
 		}
 		if( $leftFill > 0 && $leftFill <= count($state['snakes'][$s]['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
-			//$fillWeight = 50; 
 			$avoidLeft = true;
 			//if($debug){
 			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
 			//}
 		}
 		if( $upFull > 0 && $upFill <= count($state['snakes'][$s]['tails']) * 2 ){
-			//$fillWeight = 50;
 			$avoidUp = true;
 			//if($debug){
 			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
 			//}
 		} 
 		if( $rightFill > 0 && $rightFill <= count($state['snakes'][$s]['tails']) * 2 ){
-			//$fillWeight = 50;
 			$avoidRight = true;
 			//if($debug){
 			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
 			//}
 		}
 		if( $downFill > 0 && $downFill <= count($state['snakes'][$s]['tails']) * 2 ){
-			//$fillWeight = 50;
 			$avoidDown = true;
-			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Down <br>';
-			//}
 		}
 		if ($left && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
 			$targetLeft += 50;
-			//echo ".";
-			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Left Panic <br>';
-			//}
 		}
 		if ($up && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
 			$targetUp += 50;
-			//echo ".";
-			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Up Panic <br>';
-			//}
 		}
 		if ($right && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
 			$targetRight += 50;
-			//echo ".";
-			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Right Panic <br>';	
-			//}
 		}	
 		if ($down && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
 			$targetDown += 50;
-			//echo ".";
-			//if($debug){
-			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Down Panic <br>';
-			//}
 		}
 		
 		$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
