@@ -59,28 +59,35 @@ class FreeSpace
 			// If in closed space increase spaceWeight. 
 			if($bestKey == 'left' && $left){
 				$targetLeft += $spaceWeight;
-				
+				$decision_matix->incrementPreferedDirectionValue('left', $spaceWeight);
+
 				//if($debug){
 				//	$state['snakes'][$s]['reason'] .= 'Linear Space Left '.$spaceWeight.' <br>';
 				//}
 			}
 			if($bestKey == 'up' && $up){
 				$targetUp += $spaceWeight;
+				$decision_matix->incrementPreferedDirectionValue('up', $spaceWeight);
+
 				//if($debug){
 				//	$state['snakes'][$s]['reason'] .= 'Linear Space Up '.$spaceWeight.' <br>';
 				//}
 			}
 			if($bestKey == 'right' && $right){
 				$targetRight += $spaceWeight;
-				if($debug){
-					$state['snakes'][$s]['reason'] .= 'Linear Space Right '.$spaceWeight.' <br>';
-				}
+				$decision_matix->incrementPreferedDirectionValue('right', $spaceWeight);
+
+				//if($debug){
+				//	$state['snakes'][$s]['reason'] .= 'Linear Space Right '.$spaceWeight.' <br>';
+				//}
 			}	
 			if($bestKey == 'down' && $down){
 				$targetDown += $spaceWeight;
-				if($debug){
-					$state['snakes'][$s]['reason'] .= 'Linear Space Down '.$spaceWeight.' <br>';
-				}
+				$decision_matix->incrementPreferedDirectionValue('down', $spaceWeight);
+
+				//if($debug){
+				//	$state['snakes'][$s]['reason'] .= 'Linear Space Down '.$spaceWeight.' <br>';
+				//}
 			}
 		}	
 	}
@@ -122,94 +129,98 @@ class FreeSpace
 		if( $leftFill > 0 && $leftFill <= count($state['snakes'][$s]['tails']) * 2 ){ // Is there enough space to the left to fit the snake.
 			//$fillWeight = 50; 
 			$avoidLeft = true;
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
-			}
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Left <br>';
+			//}
 		}
 		if( $upFull > 0 && $upFill <= count($state['snakes'][$s]['tails']) * 2 ){
 			//$fillWeight = 50;
 			$avoidUp = true;
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
-			}
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Up <br>';
+			//}
 		} 
 		if( $rightFill > 0 && $rightFill <= count($state['snakes'][$s]['tails']) * 2 ){
 			//$fillWeight = 50;
 			$avoidRight = true;
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
-			}
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Right <br>';
+			//}
 		}
 		if( $downFill > 0 && $downFill <= count($state['snakes'][$s]['tails']) * 2 ){
 			//$fillWeight = 50;
 			$avoidDown = true;
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Down <br>';
-			}
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Avoid Down <br>';
+			//}
 		}
 		if ($left && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
 			$targetLeft += 50;
 			//echo ".";
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Target Left Panic <br>';
-			}
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Left Panic <br>';
+			//}
 		}
 		if ($up && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
-	                $targetUp += 50;
-	        	//echo ".";
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Target Up Panic <br>';
-			}
+			$targetUp += 50;
+			//echo ".";
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Up Panic <br>';
+			//}
 		}
 		if ($right && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
-	                $targetRight += 50;
-	        	//echo ".";
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Target Right Panic <br>';	
-			}
+			$targetRight += 50;
+			//echo ".";
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Right Panic <br>';	
+			//}
 		}	
 		if ($down && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
-	                $targetDown += 50;
-	        	//echo ".";
-			if($debug){
-				$state['snakes'][$s]['reason'] .= 'Flood Fill Target Down Panic <br>';
-			}
+			$targetDown += 50;
+			//echo ".";
+			//if($debug){
+			//	$state['snakes'][$s]['reason'] .= 'Flood Fill Target Down Panic <br>';
+			//}
 		}
 		
 		$directions = array( 'left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill );
-	        arsort($directions);
-	        reset($directions);
-	        $bestKey = key($directions);
-	        $bestValue = $directions[$bestKey];
-	        asort($directions);
-	        reset($directions);
-	        $worstKey = key($directions);
-	        $worstValue = $directions[$worstKey];
-	        //echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
-	        if($bestValue > 0 && $bestValue > $worstValue){
-	                if($bestKey == 'left' && $left){
-	                        $targetLeft += $fillWeight;
-				if($debug){
-					$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Left '.$fillWeight.' <br>';
-	                	}
+		arsort($directions);
+		reset($directions);
+		$bestKey = key($directions);
+		$bestValue = $directions[$bestKey];
+		asort($directions);
+		reset($directions);
+		$worstKey = key($directions);
+		$worstValue = $directions[$worstKey];
+		//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
+        if($bestValue > 0 && $bestValue > $worstValue){
+			if($bestKey == 'left' && $left){
+				$targetLeft += $fillWeight;
+				$decision_matix->incrementPreferedDirectionValue('left', $fillWeight);
+				//if($debug){
+				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Left '.$fillWeight.' <br>';
+				//}
 			}
-	                if($bestKey == 'up' && $up){
-	                        $targetUp += $fillWeight;
-				if($debug){
-					$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Up '.$fillWeight.' <br>';
-	                	}
+			if($bestKey == 'up' && $up){
+				$targetUp += $fillWeight;
+				$decision_matix->incrementPreferedDirectionValue('up', $fillWeight);
+				//if($debug){
+				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Up '.$fillWeight.' <br>';
+                //}
 			}
-	                if($bestKey == 'right' && $right){
-	                        $targetRight += $fillWeight;
-				if($debug){
-					$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Right '.$fillWeight.' <br>';
-	                	}
+			if($bestKey == 'right' && $right){
+				$targetRight += $fillWeight;
+				$decision_matix->incrementPreferedDirectionValue('right', $fillWeight);
+				//if($debug){
+				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Right '.$fillWeight.' <br>';
+                //}
 			}
-	                if($bestKey == 'down' && $down){
-	                        $targetDown += $fillWeight;
-				if($debug){
-					$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Down '.$fillWeight.' <br>';
-	                	}
+			if($bestKey == 'down' && $down){
+				$targetDown += $fillWeight;
+				$decision_matix->incrementPreferedDirectionValue('down', $fillWeight);
+				//if($debug){
+				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Down '.$fillWeight.' <br>';
+				//}
 			}
         }
 
