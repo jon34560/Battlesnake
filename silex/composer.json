@@ -35,8 +35,8 @@
     },
     "scripts": {
         "run": [
-            "echo 'Started web server on http://localhost:8888'",
-            "php -S localhost:8888 -t web --env=dev"
+            "echo 'Started web server on http://0.0.0.0:8888'",
+            "php -S 0.0.0.0:8888 -t web"
         ]
     }
 }

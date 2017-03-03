@@ -2,23 +2,24 @@
 
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-
-use BattleSnake\Controllers\StartControllerProvider;
-use BattleSnake\Controllers\MoveControllerProvider;
 
 //Request::setTrustedProxies(array('127.0.0.1'));
 
+
 $app->get('/', function () use ($app) {
     return $app['twig']->render('index.html.twig', array());
-})
-->bind('homepage')
-;
+})->bind('homepage');
 
-$app->mount('/start', new StartControllerProvider());
-$app->mount('/move', new MoveControllerProvider());
+
+$app->post('/start', function (Request $request) use ($app) {
+    return include '../src/BattleSnake/Route/start.php';
+})->bind('start');
+
+$app->post('/move', function (Request $request) use ($app) {
+    return include '../src/BattleSnake/Route/move.php';
+})->bind('move');
+
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {

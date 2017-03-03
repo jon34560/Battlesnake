@@ -1,10 +1,10 @@
 <?php
 
 /*
- * Util - Utility functions
+  * Util - Utility functions
 */
 
-namespace Util\AirNode\Util;
+namespace BattleSnake\Util;
 
 class Util
 {
