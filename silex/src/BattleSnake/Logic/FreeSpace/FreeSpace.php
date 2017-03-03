@@ -86,7 +86,7 @@ class FreeSpace
 	/**
 	* floodFillDetection
 	*
-	* Description:
+	* Description: check number of free spaces in each direction from current snake head.
 	*/
 	public static function floodFillDetection($state, $decision_matix) {
 		$fillWeight = 12; // 2; // 12 is better than 2
@@ -95,19 +95,19 @@ class FreeSpace
 		$leftSpaces = array();
 		$checkPosX = $my_snake['x'] - 1;
 		$checkPosY = $my_snake['y'];
-		$leftFill = floodFill( $state, $checkPosX, $checkPosY, $leftSpaces );
+		$leftFill = self::floodFill( $state, $checkPosX, $checkPosY, $leftSpaces );
 		$upSpaces = array();
 		$checkPosX = $my_snake['x'];
 		$checkPosY = $my_snake['y'] - 1;
-		$upFill = floodFill( $state, $checkPosX, $checkPosY, $upSpaces );
+		$upFill = self::floodFill( $state, $checkPosX, $checkPosY, $upSpaces );
 		$rightSpaces = array();
 		$checkPosX = $my_snake['x'] + 1;
 		$checkPosY = $my_snake['y'];
-		$rightFill = floodFill( $state, $checkPosX, $checkPosY, $rightSpaces );
+		$rightFill = self::floodFill( $state, $checkPosX, $checkPosY, $rightSpaces );
 		$downSpaces = array();
 		$checkPosX = $my_snake['x'];
 		$checkPosY = $my_snake['y'] + 1;
-		$downFill = floodFill( $state, $checkPosX, $checkPosY, $downSpaces );
+		$downFill = self::floodFill( $state, $checkPosX, $checkPosY, $downSpaces );
 		
 		$avoidLeft = false;
 		$avoidUp = false;
@@ -190,7 +190,7 @@ class FreeSpace
 	*
 	* Optimization: Don't search farther than we have to... 
 	*/
-	function floodFill( $state, $checkPosX, $checkPosY, &$spaces, $depth = 0 ){
+	public static function floodFill( $state, $checkPosX, $checkPosY, &$spaces, $depth = 0 ){
 		if($depth > 18){
 			return 0;
 		}
