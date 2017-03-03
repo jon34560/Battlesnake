@@ -35,6 +35,7 @@ class Board
             $snakes[$s]['health'] = $data['snakes'][$s]['health_points'];
             $snakes[$s]['alive'] = ( $data['snakes'][$s]['health_points'] > 0 ? true : false );
             $snakes[$s]['tails'] = $tails;
+            $snakes[$s]['length'] = count($data['snakes'][$s]['coords']);
 
             // Identify my snake
             if ($data['snakes'][$s]['id'] == $data['you'] ) {

@@ -58,35 +58,47 @@ class Collision
 
         for ($c = 0;  $c < count($snakes); $c++) {
             if ($c != $state['s'] && $snakes[$c]['alive'] == true) {
-                error_log('HEllo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', 0);
-                // Avoid collision with another snake's' head
-                if ($snakes[$c]['x'] == $my_snake['x'] - 1 && $snakes[$c]['y'] == $my_snake['y']) {
-                    $decision_matix->disallowDirection('left');
-                }
-                if ($snakes[$c]['x'] == $my_snake['x'] + 1 && $snakes[$c]['y'] == $my_snake['y']) {
-                    $decision_matix->disallowDirection('right');
-                }
+                // Depth = 1 Avoid collision with current location of snake's head -> body next turn
+                // Depth = 2 Avoid collision with snake heads if we are shorter
+                for ($depth = 1; $depth <= 2; $depth++) {
+                    if ($snakes[$c]['x'] == $my_snake['x'] - $depth && $snakes[$c]['y'] == $my_snake['y']) {
+                        if ($depth == 1) {
+                            $decision_matix->disallowDirection('left');
+                        } else {
+                            if ($my_snake['length'] <= $snakes[$c]['length']) {
+                                $decision_matix->disallowDirection('left');
+                            }
+                        }
+                    }
+                    if ($snakes[$c]['x'] == $my_snake['x'] + $depth && $snakes[$c]['y'] == $my_snake['y']) {
+                        if ($depth == 1) {
+                            $decision_matix->disallowDirection('right');
+                        } else {
+                            if ($my_snake['length'] <= $snakes[$c]['length']) {
+                                $decision_matix->disallowDirection('right');
+                            }
+                        }
+                    }
 
-                if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] == $my_snake['y'] - 1) {
-                    $decision_matix->disallowDirection('up');
-                }
+                    if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] == $my_snake['y'] - $depth) {
+                        if ($depth == 1) {
+                            $decision_matix->disallowDirection('up');
+                        } else {
+                            if ($my_snake['length'] <= $snakes[$c]['length']) {
+                                $decision_matix->disallowDirection('up');
+                            }
+                        }
+                    }
 
-                if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] == $my_snake['y'] + 1) {
-                    $decision_matix->disallowDirection('down');
-                }
-
-                // TODO: Expand boundary of neigbouring snake heads by 1 block in each direction.
-                if ($snakes[$c]['x'] == $my_snake['x'] - 2 && $snakes[$c]['y'] == $my_snake['y']) {
-                    $decision_matix->disallowDirection('left');
-                }
-                if ($snakes[$c]['x'] == $my_snake['x'] + 2 && $snakes[$c]['y'] == $my_snake['y']) {
-                    $decision_matix->disallowDirection('right');
-                }
-                if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] == $my_snake['y'] - 2) {
-                    $decision_matix->disallowDirection('up');
-                }
-                if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] == $my_snake['y'] + 2) {
-                    $decision_matix->disallowDirection('down');
+                    if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] == $my_snake['y'] + $depth) {
+                        if ($depth == 1) {
+                            $decision_matix->disallowDirection('down');
+                        } else {
+                            if ($my_snake['length'] <= $snakes[$c]['length']) {
+                                $decision_matix->disallowDirection('down');
+                            }
+                        }
+                    }
                 }
 
                 // Avoid collision with another snake's' tail
