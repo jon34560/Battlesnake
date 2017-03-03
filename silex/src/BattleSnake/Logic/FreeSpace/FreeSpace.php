@@ -203,7 +203,7 @@ class FreeSpace
 			return 0;
 		}
 		$isEmpty = false;
-		if( isSpaceEmpty($state, $checkPosX, $checkPosY) ){
+		if( Board::isSpaceEmpty($state, $checkPosX, $checkPosY) ){
 			$fillCount++;
 			$isEmpty = true;
 		}
