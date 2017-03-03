@@ -67,7 +67,7 @@ class DecisionMatrix
     }
 
     public function getTickCacheValue($key) {
-        return $this->_tick_cache[$key];
+        return $this->_tick_cache[$key] ?? null;
     }
 
     public function setTickCacheValue($key, $value) {

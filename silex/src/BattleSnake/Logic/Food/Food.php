@@ -35,11 +35,11 @@ class Food
         for ($f = 0; $f < count($foods); $f++) {
             for ($v = 1; $v <= $vision; $v++) {
                 // Look Left
-                if ($my_snake['x'] - $v == $foods[$f]['x'] && $my_snake['y'] == $foods[$f]['y'] && $foods[$f]['active'] == true) {
+                if ($my_snake['x'] - $v == $foods[$f]['x'] && $my_snake['y'] == $foods[$f]['y']) {
                     // Is path clear
                     $clear = true;
                     for ($p = $my_snake['x'] - 1; $p > $foods[$f]['x']; $p--) {
-                        if (!Board::isSpaceEmpty($state, $p, $my_snake['y'], $decission_matrix)) {
+                        if (!Board::isSpaceEmpty($state, $p, $my_snake['y'], $decision_matix)) {
                             $clear = false;
                         }
                     }
@@ -49,11 +49,11 @@ class Food
                 }
 
                 // Look Right
-                if ($my_snake['x'] + $v == $foods[$f]['x'] && $my_snake['y'] == $foods[$f]['y'] && $foods[$f]['active'] == true) {
+                if ($my_snake['x'] + $v == $foods[$f]['x'] && $my_snake['y'] == $foods[$f]['y']) {
                     // Is path clear
                     $clear = true;
                     for ($p = $my_snake['x'] + 1; $p < $foods[$f]['x']; $p++) {
-                        if (!Board::isSpaceEmpty($state, $p, $my_snake['y'], $decission_matrix)) {
+                        if (!Board::isSpaceEmpty($state, $p, $my_snake['y'], $decision_matix)) {
                             $clear = false;
                         }
                     }
@@ -63,11 +63,11 @@ class Food
                 }
 
                 // Look Up
-                if ($my_snake['x'] == $foods[$f]['x'] && $my_snake['y'] - $v == $foods[$f]['y'] && $foods[$f]['active'] == true) {
+                if ($my_snake['x'] == $foods[$f]['x'] && $my_snake['y'] - $v == $foods[$f]['y']) {
                     // Is path clear
                     $clear = true;
                     for ($p = $my_snake['y'] - 1; $p > $foods[$f]['y']; $p--) {
-                        if (!Board::isSpaceEmpty($state, $my_snake['x'], $p, $decission_matrix)) {
+                        if (!Board::isSpaceEmpty($state, $my_snake['x'], $p, $decision_matix)) {
                             $clear = false;
                         }
                     }
@@ -77,11 +77,11 @@ class Food
                 }
 
                 // Look Down
-                if ($my_snake['x']  == $foods[$f]['x'] && $my_snake['y'] + $v == $foods[$f]['y'] && $foods[$f]['active'] == true) {
+                if ($my_snake['x']  == $foods[$f]['x'] && $my_snake['y'] + $v == $foods[$f]['y']) {
                     // Is path clear
                     $clear = true;
                     for ($p = $my_snake['y'] + 1; $p < $foods[$f]['y']; $p++) {
-                        if (!Board::isSpaceEmpty($state, $my_snake['x'], $p, $decission_matrix)) {
+                        if (!Board::isSpaceEmpty($state, $my_snake['x'], $p, $decision_matix)) {
                             $clear = false;
                         }
                     }
@@ -110,16 +110,14 @@ class Food
         $distances = [];
 
         for ($f = 0; $f < count($foods); $f++ ) {
-            if ($foods[$f]['active'] == true) {
-                $fx = (float)$foods[$f]['x'];
-                $fy = (float)$foods[$f]['y'];
-                $distances[$f] = sqrt(pow((float)$my_snake['x'] - $fx, 2) + pow((float)$my_snake['y'] - $fy, 2));
-                // Calculate obsticles in path
-                // If other snakes (c) are within bounding box of current snake
-                $range = Board::isRangeEmpty($state, $my_snake['x'], $my_snake['y'], $fx, $fy, $decision_matix);
-                if ($range > 0) {
-                    $distances[$f] = 999999; // Forget it
-                }
+            $fx = (float)$foods[$f]['x'];
+            $fy = (float)$foods[$f]['y'];
+            $distances[$f] = sqrt(pow((float)$my_snake['x'] - $fx, 2) + pow((float)$my_snake['y'] - $fy, 2));
+            // Calculate obsticles in path
+            // If other snakes (c) are within bounding box of current snake
+            $range = Board::isRangeEmpty($state, $my_snake['x'], $my_snake['y'], $fx, $fy, $decision_matix);
+            if ($range > 0) {
+                $distances[$f] = 999999; // Forget it
             }
         }
 
