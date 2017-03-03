@@ -184,14 +184,14 @@ class FreeSpace
 	* Optimization: Don't search farther than we have to... 
 	*/
 	public static function floodFill( $state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0 ){
-		if($depth > 12){
+		if($depth > 20){
 			return 0;
 		}
 		$oldCheckPosX = $checkPosX;
 		$oldCheckPosY = $checkPosY;
 		$fillCount = 0;
 		$key = $checkPosX . '_' . $checkPosY;
-			
+
 		if(array_key_exists($key, $spaces)){
 			return 0;
 		}
