@@ -17,7 +17,7 @@ class Board
         $state['s'] = '';
 
         $snakes = array();
-        for ($s = 0; $s < count( $data['snakes'] ); $s++) {
+        for ($s = 0; $s < count($data['snakes']); $s++) {
             // id, name status message taunt age health, coords []  kills  food gold
             $tails = array();
             for ($p = 0; $p < count($data['snakes'][$s]['coords']); $p++) {
@@ -117,4 +117,21 @@ class Board
         $decission_matrix->setTickCacheValue($key, 't'); //true;
         return true;
     }
+
+    public static function isRangeEmpty($state, $x1, $y1, $x2, $y2, $decission_matrix) {
+        $count = 0;
+        $minX = min($x1, $x2);
+        $minY = min($y1, $y2);
+        $maxX = max($x1, $x2);
+        $maxY = max($y1, $y2);
+        for ($x = $minX + 1; $x < $maxX; $x++) {
+            for ($y = $minY + 1; $y < $maxY; $y++) {
+                if (!Self::isSpaceEmpty($state, $x, $y, $decission_matrix)) {
+                    $count++;
+                }
+            }
+        }
+        return $count;
+    }
+
 }

@@ -6,97 +6,89 @@
 
 namespace BattleSnake\Logic\FreeSpace;
 
+use BattleSnake\Logic\Board\Board;
+
 class FreeSpace
 {
 
 
-	/**
-	* linearFreeSpaceDetection
-	*
-	* Description: Go in direction of open space. Avoid being trapped.
-	*	This will fail if there is a way out and it is tricked into a cave.
-	*/
-	public static function floodFillDetection($state, $decision_matix) {
-		$vision = 5;
-		$spaceWeight = 1;
-		$leftSpace = 0;	
-		for($i = 1; $i < $vision + 1; $i++){
-			if(isSpaceEmpty( $state, $x - $i, $y ) ){
-				$leftSpace++;
-			}		
-		}
-		$upSpace = 0;
-		for($i = 1; $i < $vision + 1; $i++){
-			if(isSpaceEmpty( $state, $x, $y - $i ) ){
-				$upSpace++;
-			}
-        }		
-		$rightSpace = 0;
-		for($i = 1; $i < $vision + 1; $i++){
-			if(isSpaceEmpty( $state, $x + $i, $y ) ){
-				$rightSpace++;
-			}
-		}	
-		$downSpace = 0;
-		for($i = 1; $i < $vision + 1; $i++){
-			if(isSpaceEmpty( $state, $x, $y + $i ) ){
-				$downSpace++;
-			}
-		}
+    /*
+      * linearFreeSpaceDetection
+      *
+      * Description: Go in direction of open space. Avoid being trapped.
+      *	This will fail if there is a way out and it is tricked into a cave.
+    */
+    public static function floodFillDetection($state, $decision_matix) {
+        $my_snake = $state['snakes'][$state['s']];
+        $foods = $state['foods'];
+        $snakes = $state['snakes'];
 
-		// Sort best direction	
-		$directions = array( 'left' => $leftSpace, 'up' => $upSpace, 'right' => $rightSpace, 'down' => $downSpace );
-		arsort($directions);
-		reset($directions);
-		$bestKey = key($directions);
-		$bestValue = $directions[$bestKey];
-		asort($directions);
-		reset($directions);
-		$worstKey = key($directions);
-		$worstValue = $directions[$worstKey];	
-		//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
-		if($bestValue > 0 && $bestValue > $worstValue){
-			// If in closed space increase spaceWeight. 
-			if($bestKey == 'left' && $left){
-				$targetLeft += $spaceWeight;
-				$decision_matix->incrementPreferedDirectionValue('left', $spaceWeight);
+        $vision = 5;
+        $spaceWeight = 1;
 
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Linear Space Left '.$spaceWeight.' <br>';
-				//}
-			}
-			if($bestKey == 'up' && $up){
-				$targetUp += $spaceWeight;
-				$decision_matix->incrementPreferedDirectionValue('up', $spaceWeight);
+        $leftSpace = 0;
+        $rightSpace = 0;
+        $upSpace = 0;
+        $downSpace = 0;
 
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Linear Space Up '.$spaceWeight.' <br>';
-				//}
-			}
-			if($bestKey == 'right' && $right){
-				$targetRight += $spaceWeight;
-				$decision_matix->incrementPreferedDirectionValue('right', $spaceWeight);
+        // Left
+        for ($i = 1; $i < $vision + 1; $i++) {
+            if (Board::isSpaceEmpty($state, $my_snake['x'] - $i, $my_snake['y'], $decision_matix)) {
+                $leftSpace++;
+            }
+        }
+        // Right
+        for ($i = 1; $i < $vision + 1; $i++) {
+            if (Board::isSpaceEmpty($state, $my_snake['x'] + $i, $my_snake['y'], $decision_matix)) {
+                $rightSpace++;
+            }
+        }
+        // Up
+        for ($i = 1; $i < $vision + 1; $i++) {
+            if (Board::isSpaceEmpty($state, $my_snake['x'], $my_snake['y'] - $i, $decision_matix)) {
+                $upSpace++;
+            }
+        }
+        // Down
+        for ($i = 1; $i < $vision + 1; $i++) {
+            if (Board::isSpaceEmpty($state, $my_snake['x'], $my_snake['y'] + $i, $decision_matix)) {
+                $downSpace++;
+            }
+        }
 
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Linear Space Right '.$spaceWeight.' <br>';
-				//}
-			}	
-			if($bestKey == 'down' && $down){
-				$targetDown += $spaceWeight;
-				$decision_matix->incrementPreferedDirectionValue('down', $spaceWeight);
+        // Sort best direction
+        $directions = array( 'left' => $leftSpace, 'up' => $upSpace, 'right' => $rightSpace, 'down' => $downSpace );
+        arsort($directions);
+        reset($directions);
+        $bestKey = key($directions);
+        $bestValue = $directions[$bestKey];
+        asort($directions);
+        reset($directions);
+        $worstKey = key($directions);
+        $worstValue = $directions[$worstKey];
 
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Linear Space Down '.$spaceWeight.' <br>';
-				//}
-			}
-		}	
-	}
+        if ($bestValue > 0 && $bestValue > $worstValue) {
+            // If in closed space increase spaceWeight.
+            if ($bestKey == 'left' && $decision_matix->getAllowedDirectionValue('left')) {
+                $decision_matix->incrementPreferedDirectionValue('left', $spaceWeight);
+            }
+            if ($bestKey == 'up' && $decision_matix->getAllowedDirectionValue('up')) {
+                $decision_matix->incrementPreferedDirectionValue('up', $spaceWeight);
+            }
+            if ($bestKey == 'right' && $decision_matix->getAllowedDirectionValue('right')) {
+                $decision_matix->incrementPreferedDirectionValue('right', $spaceWeight);
+            }
+            if ($bestKey == 'down' && $decision_matix->getAllowedDirectionValue('down')) {
+                $decision_matix->incrementPreferedDirectionValue('down', $spaceWeight);
+            }
+        }
+    }
 
 
 	/**
 	* floodFillDetection
 	*
-	* Description: 
+	* Description:
 	*/
 	public static function floodFillDetection($state, $decision_matix) {
 		$fillWeight = 12; // 2; // 12 is better than 2
@@ -124,7 +116,7 @@ class FreeSpace
 		$avoidLeft = false;
 		$avoidUp = false;
 		$avoidRight = false;
-		$avoidDown = false; 
+		$avoidDown = false;
 
 		$snakeLength = count($state['snakes'][$s]['tails']) + 1;
 		if($debug){
