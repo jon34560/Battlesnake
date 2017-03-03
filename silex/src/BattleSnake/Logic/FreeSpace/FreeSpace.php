@@ -18,7 +18,7 @@ class FreeSpace
       * Description: Go in direction of open space. Avoid being trapped.
       *	This will fail if there is a way out and it is tricked into a cave.
     */
-    public static function floodFillDetection($state, $decision_matix) {
+    public static function linearFreeSpaceDetection($state, $decision_matix) {
         $my_snake = $state['snakes'][$state['s']];
         $foods = $state['foods'];
         $snakes = $state['snakes'];
@@ -92,25 +92,23 @@ class FreeSpace
 	*/
 	public static function floodFillDetection($state, $decision_matix) {
 		$fillWeight = 12; // 2; // 12 is better than 2
-
-		$x = $my_snake['x'];
-        $y = $my_snake['y'];
+		$my_snake = $state['snakes'][$state['s']];
 
 		$leftSpaces = array();
-		$checkPosX = $x - 1;
-		$checkPosY = $y;
+		$checkPosX = $my_snake['x'] - 1;
+		$checkPosY = $my_snake['y'];
 		$leftFill = floodFill( $state, $checkPosX, $checkPosY, $leftSpaces );
 		$upSpaces = array();
-		$checkPosX = $x;
-		$checkPosY = $y - 1;
+		$checkPosX = $my_snake['x'];
+		$checkPosY = $my_snake['y'] - 1;
 		$upFill = floodFill( $state, $checkPosX, $checkPosY, $upSpaces );
 		$rightSpaces = array();
-		$checkPosX = $x + 1;
-		$checkPosY = $y;
+		$checkPosX = $my_snake['x'] + 1;
+		$checkPosY = $my_snake['y'];
 		$rightFill = floodFill( $state, $checkPosX, $checkPosY, $rightSpaces );
 		$downSpaces = array();
-		$checkPosX = $x;
-		$checkPosY = $y + 1;
+		$checkPosX = $my_snake['x'];
+		$checkPosY = $my_snake['y'] + 1;
 		$downFill = floodFill( $state, $checkPosX, $checkPosY, $downSpaces );
 		
 		$avoidLeft = false;
@@ -234,7 +232,7 @@ class FreeSpace
 			$tx = $spaces[$key]['x'] - 1;
 			$ty = $spaces[$key]['y'];
 			$tKey = $tx . '_' . $ty; 
-			if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
 				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
@@ -244,7 +242,7 @@ class FreeSpace
 			$tx = $spaces[$key]['x'];
 			$ty = $spaces[$key]['y'] - 1;  
 			$tKey = $tx . '_' . $ty;              
-			if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
 				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
@@ -254,7 +252,7 @@ class FreeSpace
 			$tx = $spaces[$key]['x'] + 1;
 			$ty = $spaces[$key]['y'];
 			$tKey = $tx . '_' . $ty;
-			if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
 				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
@@ -264,7 +262,7 @@ class FreeSpace
 			$tx = $spaces[$key]['x'];
 			$ty = $spaces[$key]['y'] + 1;
 			$tKey = $tx . '_' . $ty;
-			if( isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
+			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
 				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
