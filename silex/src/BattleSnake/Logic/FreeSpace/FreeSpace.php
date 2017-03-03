@@ -166,35 +166,22 @@ class FreeSpace
 		//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
         if($bestValue > 0 && $bestValue > $worstValue){
 			if($bestKey == 'left' && $left){
-				$targetLeft += $fillWeight;
+				//$targetLeft += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('left', $fillWeight);
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Left '.$fillWeight.' <br>';
-				//}
 			}
 			if($bestKey == 'up' && $up){
-				$targetUp += $fillWeight;
+				//$targetUp += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('up', $fillWeight);
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Up '.$fillWeight.' <br>';
-                //}
 			}
 			if($bestKey == 'right' && $right){
-				$targetRight += $fillWeight;
+				//$targetRight += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('right', $fillWeight);
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Right '.$fillWeight.' <br>';
-                //}
 			}
 			if($bestKey == 'down' && $down){
-				$targetDown += $fillWeight;
+				//$targetDown += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('down', $fillWeight);
-				//if($debug){
-				//	$state['snakes'][$s]['reason'] .= 'Flood Fill Prefer Down '.$fillWeight.' <br>';
-				//}
 			}
         }
-
 	}
 
 
