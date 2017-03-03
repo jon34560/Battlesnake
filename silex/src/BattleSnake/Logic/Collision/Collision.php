@@ -58,6 +58,7 @@ class Collision
 
         for ($c = 0;  $c < count($snakes); $c++) {
             if ($c != $state['s'] && $snakes[$c]['alive'] == true) {
+                error_log('HEllo!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!', 0);
                 // Avoid collision with another snake's' head
                 if ($snakes[$c]['x'] == $my_snake['x'] - 1 && $snakes[$c]['y'] == $my_snake['y']) {
                     $decision_matix->disallowDirection('left');

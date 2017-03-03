@@ -10,8 +10,6 @@ use BattleSnake\Logic\Board\Board;
 
 class FreeSpace
 {
-
-
     /*
       * linearFreeSpaceDetection
       *
@@ -192,7 +190,7 @@ class FreeSpace
 	* Optimization: Don't search farther than we have to... 
 	*/
 	public static function floodFill( $state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0 ){
-		if($depth > 18){
+		if($depth > 12){
 			return 0;
 		}
 		$oldCheckPosX = $checkPosX;
