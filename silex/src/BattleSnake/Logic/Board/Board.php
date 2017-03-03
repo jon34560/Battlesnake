@@ -54,4 +54,67 @@ class Board
 
         return (array)$state;
     }
+
+    public static function isSpaceOnBoard($state, $x, $y, $decission_matrix) {
+        $key = $x . "_" . $y . "b";
+        $result = $decission_matrix->getTickCacheValue($key);
+
+        if ($result == 't') {
+            return true;
+        } else if ($result == 'f') {
+            return false;
+        }
+
+        if ($x < 0) {
+            $decission_matrix->setTickCacheValue($key, 'f'); //false;
+            return false;
+        }
+        if ($y < 0) {
+            $decission_matrix->setTickCacheValue($key, 'f'); //false;
+            return false;
+        }
+        if ($x > ($state['board_width'] - 1)) {
+            $decission_matrix->setTickCacheValue($key, 'f'); //false;
+            return false;
+        }
+        if ($y > ($state['board_height'] - 1)) {
+            $decission_matrix->setTickCacheValue($key, 'f'); //false;
+            return false;
+        }
+        $decission_matrix->setTickCacheValue($key, 't'); //true;
+        return true;
+    }
+
+    public static function isSpaceEmpty($state, $x, $y, $decission_matrix) {
+        $my_snake = $state['snakes'][$state['s']];
+        $key = $x . "_" . $y . "e";
+        $result = $decission_matrix->getTickCacheValue($key);
+
+        if ($result == 't') {
+            return true;
+        } else if ($result == 'f') {
+            return false;
+        }
+
+        if (!self::isSpaceOnBoard($state, $x, $y, $decission_matrix)) {
+            $decission_matrix->setTickCacheValue($key, 'f'); //false;
+            return false;
+        }
+
+        for ($s = 0; $s < count($state['snakes']); $s++ ) {
+            if ($my_snake['x'] == $x && $my_snake['y'] == $y && $my_snake['alive'] == true) {
+                $decission_matrix->setTickCacheValue($key, 'f'); //false;
+                return false;
+            }
+
+            for ($t = 0; $t < count($my_snake['tails']); $t++) {
+                if ($x == $my_snake['tails'][$t]['x'] && $y == $my_snake['tails'][$t]['y'] && $my_snake['alive'] == true) {
+                    $decission_matrix->setTickCacheValue($key, 'f'); //false;
+                    return false;
+                }
+            }
+        }
+        $decission_matrix->setTickCacheValue($key, 't'); //true;
+        return true;
+    }
 }

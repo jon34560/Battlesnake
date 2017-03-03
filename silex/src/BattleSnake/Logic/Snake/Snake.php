@@ -8,5 +8,5 @@ namespace BattleSnake\Logic\Snake;
 
 class Snake
 {
-    
+
 }
