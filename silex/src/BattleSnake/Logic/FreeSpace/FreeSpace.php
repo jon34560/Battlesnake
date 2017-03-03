@@ -142,7 +142,7 @@ class FreeSpace
       		//$targetRight += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
-      		$decision_matix->incrementPreferedDirectionValue('sown', 50);
+      		$decision_matix->incrementPreferedDirectionValue('down', 50);
       		//$targetDown += 50;
 		}
 		
