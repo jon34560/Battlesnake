@@ -90,7 +90,7 @@ class Collision
 
                 // Avoid collision with another snake's' tail
                 for ($t = 0; $t < count($snakes[$c]['tails']); $t++) {
-                    if ($snakes['tails'][$t]['x'] == $my_snake['x'] - 1 && $snakes[$c]['tails'][$t]['y'] == $my_snake['y']) {
+                    if ($snakes[$c]['tails'][$t]['x'] == $my_snake['x'] - 1 && $snakes[$c]['tails'][$t]['y'] == $my_snake['y']) {
                         $decision_matix->disallowDirection('left');
                     }
                     if ($snakes[$c]['tails'][$t]['x'] == $my_snake['x'] + 1 && $snakes[$c]['tails'][$t]['y'] == $my_snake['y']) {
