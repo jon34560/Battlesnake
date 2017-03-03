@@ -95,19 +95,19 @@ class FreeSpace
 		$leftSpaces = array();
 		$checkPosX = $my_snake['x'] - 1;
 		$checkPosY = $my_snake['y'];
-		$leftFill = self::floodFill( $state, $checkPosX, $checkPosY, $leftSpaces );
+		$leftFill = self::floodFill( $state, $checkPosX, $checkPosY, $leftSpaces, $decision_matix );
 		$upSpaces = array();
 		$checkPosX = $my_snake['x'];
 		$checkPosY = $my_snake['y'] - 1;
-		$upFill = self::floodFill( $state, $checkPosX, $checkPosY, $upSpaces );
+		$upFill = self::floodFill( $state, $checkPosX, $checkPosY, $upSpaces, $decision_matix );
 		$rightSpaces = array();
 		$checkPosX = $my_snake['x'] + 1;
 		$checkPosY = $my_snake['y'];
-		$rightFill = self::floodFill( $state, $checkPosX, $checkPosY, $rightSpaces );
+		$rightFill = self::floodFill( $state, $checkPosX, $checkPosY, $rightSpaces, $decision_matix );
 		$downSpaces = array();
 		$checkPosX = $my_snake['x'];
 		$checkPosY = $my_snake['y'] + 1;
-		$downFill = self::floodFill( $state, $checkPosX, $checkPosY, $downSpaces );
+		$downFill = self::floodFill( $state, $checkPosX, $checkPosY, $downSpaces, $decision_matix );
 		
 		$avoidLeft = false;
 		$avoidUp = false;
@@ -190,7 +190,7 @@ class FreeSpace
 	*
 	* Optimization: Don't search farther than we have to... 
 	*/
-	public static function floodFill( $state, $checkPosX, $checkPosY, &$spaces, $depth = 0 ){
+	public static function floodFill( $state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0 ){
 		if($depth > 18){
 			return 0;
 		}
@@ -203,7 +203,7 @@ class FreeSpace
 			return 0;
 		}
 		$isEmpty = false;
-		if( Board::isSpaceEmpty($state, $checkPosX, $checkPosY) ){
+		if( Board::isSpaceEmpty($state, $checkPosX, $checkPosY, $decision_matix) ){
 			$fillCount++;
 			$isEmpty = true;
 		}
@@ -220,7 +220,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
 			}
 			
 			// Up
@@ -230,7 +230,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
 			}		 
 				
 			// Right
@@ -240,7 +240,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
 			}
 			
 			// Down
@@ -250,7 +250,7 @@ class FreeSpace
 			if( Board::isSpaceOnBoard( $state, $tx , $ty) && !array_key_exists($tKey, $spaces) ){
 				$checkPosX = $tx;
 				$checkPosY = $ty;
-				$fillCount += floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $depth+1 );
+				$fillCount += self::floodFill( $state, $checkPosX, $checkPosY, $direction, $spaces, $decision_matix, $depth+1 );
 			}		
 		}
 		return $fillCount;
