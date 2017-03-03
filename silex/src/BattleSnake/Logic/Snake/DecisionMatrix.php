@@ -83,7 +83,7 @@ class DecisionMatrix
 
       // Choose direction of best target if it is > 0 and > worst target. 
       // I.e. if they are all the same skip and choose randomly later.
-      // IDEA: if we can't go in one direction we should give higher preference to allowable dirs
+      // TODO IDEA: if we can't go in one direction we should give higher preference to allowable dirs. 
       $targets = array( 'left' => $this->_prefered_direction['left'], 
         'up' => $this->_prefered_direction['up'], 
         'right' => $this->_prefered_direction['right'], 
@@ -108,6 +108,23 @@ class DecisionMatrix
         }
         if($bestKey == 'down' && $this->_allowed_direction['down']){
           return 'down'; // Go Down
+        }
+      }
+
+      // Choose a random allowable direction. This prevents direction bias
+      for($i = 0; $i < 6; $i++ ){ // Try a few times to find a random direction that is available.
+        $dir = rand(0, 3);
+        if($dir == 0 && $this->_allowed_direction['left']){
+          return 'left';
+        } 
+        if($dir == 1 && $this->_allowed_direction['up']){
+          return 'up';
+        }
+        if($dir == 2 && $this->_allowed_direction['right']){
+          return 'right';
+        }
+        if($dir == 3 && $this->_allowed_direction['down']){
+          return 'down';
         }
       }
 
