@@ -20,8 +20,6 @@ class FreeSpace
     */
     public static function floodFillDetection($state, $decision_matix) {
         $my_snake = $state['snakes'][$state['s']];
-        $foods = $state['foods'];
-        $snakes = $state['snakes'];
 
         $vision = 5;
         $spaceWeight = 1;
@@ -57,7 +55,7 @@ class FreeSpace
         }
 
         // Sort best direction
-        $directions = array( 'left' => $leftSpace, 'up' => $upSpace, 'right' => $rightSpace, 'down' => $downSpace );
+        $directions = ['left' => $leftSpace, 'up' => $upSpace, 'right' => $rightSpace, 'down' => $downSpace];
         arsort($directions);
         reset($directions);
         $bestKey = key($directions);

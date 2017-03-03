@@ -32,15 +32,15 @@ class DecisionMatrix
         return $this->_allowed_direction;
     }
 
-    public function getAllowedDirectionValue(string $key) {
+    public function getAllowedDirectionValue($key) {
         return $this->_allowed_direction[$key];
     }
 
-    public function disallowDirection(string $direction) {
+    public function disallowDirection($direction) {
         $this->_allowed_direction[$direction] = false;
     }
 
-    public function allowDirection(string $direction) {
+    public function allowDirection($direction) {
         $this->_allowed_direction[$direction] = true;
     }
 
@@ -49,15 +49,15 @@ class DecisionMatrix
         return $this->_prefered_direction;
     }
 
-    public function getPreferedDirectionValue(string $key) {
+    public function getPreferedDirectionValue($key) {
         return $this->_prefered_direction[$key];
     }
 
-    public function incrementPreferedDirectionValue(string $key, int $value) {
+    public function incrementPreferedDirectionValue($key, $value) {
         $this->_prefered_direction[$key] += $value;
     }
 
-    public function decrementPreferedDirectionValue(string $key, int $value) {
+    public function decrementPreferedDirectionValue($key, $value) {
         $this->_prefered_direction[$key] -= $value;
     }
 
@@ -66,11 +66,11 @@ class DecisionMatrix
         return $this->_tick_cache;
     }
 
-    public function getTickCacheValue(string $key) {
+    public function getTickCacheValue($key) {
         return $this->_tick_cache[$key];
     }
 
-    public function setTickCacheValue(string $key, string $value) {
+    public function setTickCacheValue($key, $value) {
         $this->_tick_cache[$key] = $value;
     }
 
