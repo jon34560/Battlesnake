@@ -29,7 +29,7 @@ class Food
             $vision = 12;
         }
         if ($my_snake['health'] < 50) {
-            $vision = 20;
+            $vision = 30;
         }
 
         for ($f = 0; $f < count($foods); $f++) {
@@ -105,6 +105,15 @@ class Food
         }
         if ($my_snake['health'] < 50) {  // Prioritize food when health low
             $dirWeight = 15;
+        }
+	if ($my_snake['health'] < 40){
+		$dirWeight = 25;
+	}
+	if ($my_snake['health'] < 30){
+                $dirWeight = 45;
+        }
+	if ($my_snake['health'] < 20){
+                $dirWeight = 200;
         }
 
         $distances = [];

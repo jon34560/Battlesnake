@@ -29,6 +29,7 @@ Food::angleFoodSearch($state, $decision_matix);
 
 FreeSpace::linearFreeSpaceDetection($state, $decision_matix);
 FreeSpace::floodFillDetection($state, $decision_matix);
+FreeSpace::weightedFloodFillDetection($state, $decision_matix);
 
 $return_data = array( 'move' => $decision_matix->decideMoveDirection(), 'taunt' => 'Everyone wins!' );
 return $app->json($return_data, 200);
