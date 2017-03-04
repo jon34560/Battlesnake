@@ -88,6 +88,7 @@ class Board
 
     public static function isSpaceEmpty($state, $x, $y, $decission_matrix) {
         $my_snake = $state['snakes'][$state['s']];
+        $snakes = $state['snakes'];
         $key = $x . "_" . $y . "e";
         $result = $decission_matrix->getTickCacheValue($key);
 
@@ -102,14 +103,13 @@ class Board
             return false;
         }
 
-        for ($s = 0; $s < count($state['snakes']); $s++ ) {
-            if ($my_snake['x'] == $x && $my_snake['y'] == $y && $my_snake['alive'] == true) {
+        for ($s = 0; $s < count($snakes); $s++) {
+            if ($snakes[$s]['x'] == $x && $snakes[$s]['y'] == $y && $snakes[$s]['alive'] == true) {
                 $decission_matrix->setTickCacheValue($key, 'f'); //false;
                 return false;
             }
-
-            for ($t = 0; $t < count($my_snake['tails']); $t++) {
-                if ($x == $my_snake['tails'][$t]['x'] && $y == $my_snake['tails'][$t]['y'] && $my_snake['alive'] == true) {
+            for ($t = 0; $t < count($snakes[$s]['tails']); $t++) {
+                if ($x == $snakes[$s]['tails'][$t]['x'] && $y == $snakes[$s]['tails'][$t]['y'] && $snakes[$s]['alive'] == true) {
                     $decission_matrix->setTickCacheValue($key, 'f'); //false;
                     return false;
                 }
