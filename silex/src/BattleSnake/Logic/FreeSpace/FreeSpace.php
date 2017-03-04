@@ -249,9 +249,10 @@ class FreeSpace
     * weightedFloodFillDetection
     *
     * Description: check number of free spaces in each direction from current snake head.
+    *  WARNING: the fillWeight must be less that that of the floodFillDetection function!!!
     */
     public static function weightedFloodFillDetection($state, $decision_matix) {
-        $fillWeight = 12; // 2; // 12 is better than 2
+        $fillWeight = 5; // 2; // 12 is better than 2
         $my_snake = $state['snakes'][$state['s']];
 
         $leftSpaces = [];
@@ -292,18 +293,18 @@ class FreeSpace
         }
 
         // If one direction is good and one or more other directions are bad, increase the priority.
-        if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $my_snake['length']*2 && ( $avoidUp || $avoidRight || $avoidDown ))) {
-              $decision_matix->incrementPreferedDirectionValue('left', 50);
-        }
-        if ($decision_matix->getAllowedDirectionValue('up') && ($upFill > $my_snake['length']*2 && ( $avoidLeft || $avoidRight || $avoidDown ))) {
-              $decision_matix->incrementPreferedDirectionValue('up', 50);
-        }
-        if ($decision_matix->getAllowedDirectionValue('right') && ($rightFill > $my_snake['length']*2 && ( $avoidLeft || $avoidUp || $avoidDown ))) {
-              $decision_matix->incrementPreferedDirectionValue('right', 50);
-        }
-        if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $my_snake['length']*2 && ( $avoidLeft || $avoidUp || $avoidRight ))) {
-              $decision_matix->incrementPreferedDirectionValue('down', 50);
-        }
+        //if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $my_snake['length']*2 && ( $avoidUp || $avoidRight || $avoidDown ))) {
+        //      $decision_matix->incrementPreferedDirectionValue('left', 50);
+        //}
+        //if ($decision_matix->getAllowedDirectionValue('up') && ($upFill > $my_snake['length']*2 && ( $avoidLeft || $avoidRight || $avoidDown ))) {
+        //      $decision_matix->incrementPreferedDirectionValue('up', 50);
+        //}
+        //if ($decision_matix->getAllowedDirectionValue('right') && ($rightFill > $my_snake['length']*2 && ( $avoidLeft || $avoidUp || $avoidDown ))) {
+        //      $decision_matix->incrementPreferedDirectionValue('right', 50);
+        //}
+        //if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $my_snake['length']*2 && ( $avoidLeft || $avoidUp || $avoidRight ))) {
+        //      $decision_matix->incrementPreferedDirectionValue('down', 50);
+        //}
 
         // Chose direction based on direction counts found.
         $directions = ['left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill];
