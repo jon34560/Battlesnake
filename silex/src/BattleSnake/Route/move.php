@@ -28,9 +28,12 @@ Food::linearFoodSearch($state, $decision_matix);
 Food::angleFoodSearch($state, $decision_matix);
 Food::pathFoodSearch($state, $decision_matix, $log);
 
-FreeSpace::linearFreeSpaceDetection($state, $decision_matix);
+FreeSpace::linearFreeSpaceDetection($state, $decision_matix, $log);
 FreeSpace::floodFillDetection($state, $decision_matix);
-FreeSpace::weightedFloodFillDetection($state, $decision_matix);
+FreeSpace::weightedFloodFillDetection($state, $decision_matix, $log);
+FreeSpace::preferWallGap($state, $decision_matix, $log);
+FreeSpace::preferSelfGap($state, $decision_matix, $log);
+
 
 $return_data = array( 'move' => $decision_matix->decideMoveDirection(), 'taunt' => 'Everyone wins!' );
 return $app->json($return_data, 200);
