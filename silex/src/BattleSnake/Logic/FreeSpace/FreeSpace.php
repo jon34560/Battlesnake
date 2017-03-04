@@ -138,7 +138,7 @@ class FreeSpace
         }
 
         // If one direction is good and one or more other directions are bad, increase the priority.
-        if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $my_snake['length']*2 && ( $avoidUp || $avoidRight || $avoidDown ))) {
+        /*if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $my_snake['length']*2 && ( $avoidUp || $avoidRight || $avoidDown ))) {
               $decision_matix->incrementPreferedDirectionValue('left', 50);
         }
         if ($decision_matix->getAllowedDirectionValue('up') && ($upFill > $my_snake['length']*2 && ( $avoidLeft || $avoidRight || $avoidDown ))) {
@@ -149,7 +149,7 @@ class FreeSpace
         }
         if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $my_snake['length']*2 && ( $avoidLeft || $avoidUp || $avoidRight ))) {
               $decision_matix->incrementPreferedDirectionValue('down', 50);
-        }
+        }*/
 
         // Chose direction based on direction counts found.
         $directions = ['left' => $leftFill, 'up' => $upFill, 'right' => $rightFill, 'down' => $downFill];
