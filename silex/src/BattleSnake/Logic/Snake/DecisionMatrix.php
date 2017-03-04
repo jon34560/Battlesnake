@@ -136,6 +136,6 @@ class DecisionMatrix
       }
 
       // Worst case
-      //return 'down'; 
+      //return 'down';
     }
 }
