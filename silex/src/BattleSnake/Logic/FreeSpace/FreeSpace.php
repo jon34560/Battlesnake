@@ -128,20 +128,20 @@ class FreeSpace
 
 		// If one direction is good and one or more other directions are bad, increase the priority.
 		if ($decision_matix->getAllowedDirectionValue('left') && ($leftFill > $snakeLength*2 && ( $avoidUp || $avoidRight || $avoidDown )) ){
-      		$decision_matix->incrementPreferedDirectionValue('left', 50);
+      			$decision_matix->incrementPreferedDirectionValue('left', 50);
 			//$targetLeft += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('up') && ($upFill > $snakeLength*2 && ( $avoidLeft || $avoidRight || $avoidDown )) ){
-      		$decision_matix->incrementPreferedDirectionValue('up', 50);
+      			$decision_matix->incrementPreferedDirectionValue('up', 50);
 			//$targetUp += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('right') && ($rightFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidDown )) ){
-      		$decision_matix->incrementPreferedDirectionValue('right', 50);
-      		//$targetRight += 50;
+      			$decision_matix->incrementPreferedDirectionValue('right', 50);
+      			//$targetRight += 50;
 		}
 		if ($decision_matix->getAllowedDirectionValue('down') && ($downFill > $snakeLength*2 && ( $avoidLeft || $avoidUp || $avoidRight )) ){
-      		$decision_matix->incrementPreferedDirectionValue('down', 50);
-      		//$targetDown += 50;
+      			$decision_matix->incrementPreferedDirectionValue('down', 50);
+      			//$targetDown += 50;
 		}
 		
 		// Chose direction based on direction counts found.
@@ -155,7 +155,7 @@ class FreeSpace
 		$worstKey = key($directions);
 		$worstValue = $directions[$worstKey];
 		//echo " best " . $bestKey . " v " . $bestValue . "   ----- worst " . $worstKey. " v " .$worstValue. "<br>"; 
-        if($bestValue > 0 && $bestValue > $worstValue){
+        	if($bestValue > 0 && $bestValue > $worstValue){
 			if($bestKey == 'left' && $decision_matix->getAllowedDirectionValue('left')){
 				//$targetLeft += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('left', $fillWeight);
@@ -172,7 +172,7 @@ class FreeSpace
 				//$targetDown += $fillWeight;
 				$decision_matix->incrementPreferedDirectionValue('down', $fillWeight);
 			}
-        }
+        	}
 	}
 
 
