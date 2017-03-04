@@ -177,7 +177,7 @@ class FreeSpace
     */
     public static function floodFill($state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0) {
         // Limit floodFill recursion
-        if ($depth > 200) {
+        if ($depth > 50) {
             return 0;
         }
 
