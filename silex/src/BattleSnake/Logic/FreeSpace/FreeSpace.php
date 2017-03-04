@@ -20,7 +20,7 @@ class FreeSpace
         $my_snake = $state['snakes'][$state['s']];
 
         $vision = 5;
-        $spaceWeight = 1;
+        $spaceWeight = 10; // was 1 but 10 is better
 
         $leftSpace = 0;
         $rightSpace = 0;
@@ -177,7 +177,7 @@ class FreeSpace
     */
     public static function floodFill($state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0) {
         // Limit floodFill recursion
-        if ($depth > 50) {
+        if ($depth > 40) {
             return 0;
         }
 
@@ -342,7 +342,7 @@ class FreeSpace
     */
     public static function weightedFloodFill($state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0) {
         // Limit floodFill recursion
-        if ($depth > 20) {
+        if ($depth > 6) {
             return 0;
         }
 
@@ -357,7 +357,7 @@ class FreeSpace
 
         $isEmpty = false;
         if (Board::isSpaceEmpty($state, $checkPosX, $checkPosY, $decision_matix)) {
-            $fillCount = $fillCount + (4 / ($depth+1));
+            $fillCount = $fillCount + (20 - $depth);
             $isEmpty = true;
         }
 
