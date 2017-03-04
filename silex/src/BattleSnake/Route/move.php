@@ -28,7 +28,7 @@ Food::linearFoodSearch($state, $decision_matix);
 Food::angleFoodSearch($state, $decision_matix);
 
 FreeSpace::linearFreeSpaceDetection($state, $decision_matix, $log);
-FreeSpace::floodFillDetection($state, $decision_matix);
+FreeSpace::floodFillDetection($state, $decision_matix, $log);
 FreeSpace::weightedFloodFillDetection($state, $decision_matix, $log);
 FreeSpace::preferWallGap($state, $decision_matix, $log);
 FreeSpace::preferSelfGap($state, $decision_matix, $log);

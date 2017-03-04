@@ -65,13 +65,10 @@ class FreeSpace
         reset($directions);
         $bestKey = key($directions);
         $bestValue = $directions[$bestKey];
-        $log->warning(print_r($directions, true));
-        $log->warning($bestValue);
         asort($directions);
         reset($directions);
         $worstKey = key($directions);
         $worstValue = $directions[$worstKey];
-        $log->warning($worstValue);
 
         if ($bestValue > 0 && $bestValue > $worstValue) {
             // If in closed space increase spaceWeight.
@@ -99,32 +96,32 @@ class FreeSpace
     *
     * Description: check number of free spaces in each direction from current snake head.
     */
-    public static function floodFillDetection($state, $decision_matix) {
+    public static function floodFillDetection($state, $decision_matix, $log) {
         $fillWeight = 6; // 2; // 12 is better than 2
         $my_snake = $state['snakes'][$state['s']];
 
         $leftSpaces = [];
         $checkPosX = $my_snake['x'] - 1;
         $checkPosY = $my_snake['y'];
-        $leftFill = self::floodFill($state, $checkPosX, $checkPosY, $leftSpaces, $decision_matix);
+        $leftFill = self::floodFill($state, $checkPosX, $checkPosY, $leftSpaces, $decision_matix, 0, $log);
         $avoidLeft = false;
 
         $rightSpaces = [];
         $checkPosX = $my_snake['x'] + 1;
         $checkPosY = $my_snake['y'];
-        $rightFill = self::floodFill($state, $checkPosX, $checkPosY, $rightSpaces, $decision_matix);
+        $rightFill = self::floodFill($state, $checkPosX, $checkPosY, $rightSpaces, $decision_matix, 0, $log);
         $avoidRight = false;
 
         $upSpaces = [];
         $checkPosX = $my_snake['x'];
         $checkPosY = $my_snake['y'] - 1;
-        $upFill = self::floodFill($state, $checkPosX, $checkPosY, $upSpaces, $decision_matix);
+        $upFill = self::floodFill($state, $checkPosX, $checkPosY, $upSpaces, $decision_matix, 0, $log);
         $avoidUp = false;
 
         $downSpaces = [];
         $checkPosX = $my_snake['x'];
         $checkPosY = $my_snake['y'] + 1;
-        $downFill = self::floodFill($state, $checkPosX, $checkPosY, $downSpaces, $decision_matix);
+        $downFill = self::floodFill($state, $checkPosX, $checkPosY, $downSpaces, $decision_matix, 0, $log);
         $avoidDown = false;
 
         if ($leftFill > 0 && $leftFill <= count($my_snake['tails']) * 2) { // Is there enough space to the left to fit the snake.
@@ -167,15 +164,19 @@ class FreeSpace
 
         if ($bestValue > 0 && $bestValue > $worstValue) {
             if ($bestKey == 'left' && $decision_matix->getAllowedDirectionValue('left')) {
+                $log->warning("FloodFill: Prefer Left");
                 $decision_matix->incrementPreferedDirectionValue('left', $fillWeight);
             }
             if ($bestKey == 'right' && $decision_matix->getAllowedDirectionValue('right')) {
+                $log->warning("FloodFill: Prefer Right");
                 $decision_matix->incrementPreferedDirectionValue('right', $fillWeight);
             }
             if ($bestKey == 'up' && $decision_matix->getAllowedDirectionValue('up')) {
+                $log->warning("FloodFill: Prefer Up");
                 $decision_matix->incrementPreferedDirectionValue('up', $fillWeight);
             }
             if ($bestKey == 'down' && $decision_matix->getAllowedDirectionValue('down')) {
+                $log->warning("FloodFill: Prefer Down");
                 $decision_matix->incrementPreferedDirectionValue('down', $fillWeight);
             }
         }
@@ -189,7 +190,7 @@ class FreeSpace
     *
     * Optimization: Don't search farther than we have to...
     */
-    public static function floodFill($state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0) {
+    public static function floodFill($state, $checkPosX, $checkPosY, &$spaces, $decision_matix, $depth = 0, $log) {
         // Limit floodFill recursion
         if ($depth > 40) {
             return 0;
@@ -221,7 +222,7 @@ class FreeSpace
             if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
-                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
+                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1, $log);
             }
 
             // Up
@@ -231,7 +232,7 @@ class FreeSpace
             if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
-                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
+                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1, $log);
             }
 
             // Right
@@ -241,7 +242,7 @@ class FreeSpace
             if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
-                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
+                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1, $log);
             }
 
             // Down
@@ -251,7 +252,7 @@ class FreeSpace
             if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
-                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
+                $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1, $log);
             }
         }
         return $fillCount;
@@ -428,7 +429,7 @@ class FreeSpace
                 if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                     $checkPosX = $tx;
                     $checkPosY = $ty;
-                    $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $look_direction, $depth+1, $log);
+                    $fillCount += self::weightedFloodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $look_direction, $depth+1, $log);
                 }
             }
         }
@@ -448,25 +449,25 @@ class FreeSpace
         // Only bother checking if we haven't already eliminated the option
         if ($decision_matix->getAllowedDirectionValue('left')) {
             if ($my_snake['x'] - 2 < 0) {
-                $log->warning("Prefer other directions then Left -> don't want to be up against a wall");
+                $log->warning("preferWallGap: Avoid Left");
                 $decision_matix->decrementPreferedDirectionValue('left', $decrementWeight);
             }
         }
         if ($decision_matix->getAllowedDirectionValue('right')) {
             if ($my_snake['x'] + 2 >= $state['board_width']) {
-                $log->warning("Prefer other directions then Right -> don't want to be up against a wall");
+                $log->warning("preferWallGap: Avoid Right");
                 $decision_matix->decrementPreferedDirectionValue('right', $decrementWeight);
             }
         }
         if ($decision_matix->getAllowedDirectionValue('up')) {
             if ($my_snake['y'] - 2 < 0) {
-                $log->warning("Prefer other directions then Up -> don't want to be up against a wall");
+                $log->warning("preferWallGap: Avoid Up");
                 $decision_matix->decrementPreferedDirectionValue('up', $decrementWeight);
             }
         }
         if ($decision_matix->getAllowedDirectionValue('down')) {
             if ($my_snake['y'] + 2 >= $state['board_height']) {
-                $log->warning("Prefer other directions then Down -> don't want to be up against a wall");
+                $log->warning("preferWallGap: Avoid Down");
                 $decision_matix->decrementPreferedDirectionValue('down', $decrementWeight);
             }
         }
@@ -486,7 +487,7 @@ class FreeSpace
         if ($decision_matix->getAllowedDirectionValue('left')) {
             for ($c = 0; $c < count($my_snake['tails']); $c++) {
                 if ($my_snake['x'] - 1 == $my_snake['tails'][$c]['x'] && ($my_snake['y'] == $my_snake['tails'][$c]['y'] - 1 || $my_snake['y'] == $my_snake['tails'][$c]['y'] + 1)) {
-                    $log->warning("Prefer other directions then Left -> don't want to be up against ourselves");
+                    $log->warning("preferSelfGap: Avoid Left");
                     $decision_matix->decrementPreferedDirectionValue('left', $decrementWeight);
                     break;
                 }
@@ -495,7 +496,7 @@ class FreeSpace
         if ($decision_matix->getAllowedDirectionValue('right')) {
             for ($c = 0; $c < count($my_snake['tails']); $c++) {
                 if ($my_snake['x'] + 1 == $my_snake['tails'][$c]['x'] && ($my_snake['y'] == $my_snake['tails'][$c]['y'] - 1 || $my_snake['y'] == $my_snake['tails'][$c]['y'] + 1)) {
-                    $log->warning("Prefer other directions then Right -> don't want to be up against ourselves");
+                    $log->warning("preferSelfGap: Avoid Right");
                     $decision_matix->decrementPreferedDirectionValue('right', $decrementWeight);
                     break;
                 }
@@ -504,7 +505,7 @@ class FreeSpace
         if ($decision_matix->getAllowedDirectionValue('up')) {
             for ($c = 0; $c < count($my_snake['tails']); $c++) {
                 if ($my_snake['y'] - 1 == $my_snake['tails'][$c]['y'] && ($my_snake['x'] == $my_snake['tails'][$c]['x'] - 1 || $my_snake['x'] == $my_snake['tails'][$c]['x'] + 1)) {
-                    $log->warning("Prefer other directions then Up -> don't want to be up against ourselves");
+                    $log->warning("preferSelfGap: Avoid Up");
                     $decision_matix->decrementPreferedDirectionValue('up', $decrementWeight);
                     break;
                 }
@@ -513,7 +514,7 @@ class FreeSpace
         if ($decision_matix->getAllowedDirectionValue('down')) {
             for ($c = 0; $c < count($my_snake['tails']); $c++) {
                 if ($my_snake['y'] + 1 == $my_snake['tails'][$c]['y'] && ($my_snake['x'] == $my_snake['tails'][$c]['x'] - 1 || $my_snake['x'] == $my_snake['tails'][$c]['x'] + 1)) {
-                    $log->warning("Prefer other directions then Down -> don't want to be up against ourselves");
+                    $log->warning("preferSelfGap: Avoid Down");
                     $decision_matix->decrementPreferedDirectionValue('down', $decrementWeight);
                     break;
                 }
