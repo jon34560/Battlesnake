@@ -74,36 +74,37 @@ class Collision
                     $decision_matix->disallowDirection('down');
                 }
 
-                // Avoid head to head collisions with other snakes if we are shorter
-                if ($snakes[$c]['x'] + 1 == $my_snake['x'] - 1 && $snakes[$c]['y'] == $my_snake['y'] && $my_snake['length'] <= $snakes[$c]['length']) {
-                    $decision_matix->disallowDirection('left');
-                }
-                if ($snakes[$c]['x'] - 1 == $my_snake['x'] + 1 && $snakes[$c]['y'] == $my_snake['y'] && $my_snake['length'] <= $snakes[$c]['length']) {
-                    $decision_matix->disallowDirection('right');
-                }
-                if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] + 1 == $my_snake['y'] - 1 && $my_snake['length'] <= $snakes[$c]['length']) {
-                    $decision_matix->disallowDirection('up');
-                }
-                if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] - 1 == $my_snake['y'] + 1 && $my_snake['length'] <= $snakes[$c]['length']) {
-                    $decision_matix->disallowDirection('down');
+                if ($my_snake['length'] <= $snakes[$c]['length']) {
+                    // Avoid head to head collisions with other snakes if we are shorter
+                    if ($snakes[$c]['x'] + 1 == $my_snake['x'] - 1 && $snakes[$c]['y'] == $my_snake['y']) {
+                        $decision_matix->disallowDirection('left');
+                    }
+                    if ($snakes[$c]['x'] - 1 == $my_snake['x'] + 1 && $snakes[$c]['y'] == $my_snake['y']) {
+                        $decision_matix->disallowDirection('right');
+                    }
+                    if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] + 1 == $my_snake['y'] - 1) {
+                        $decision_matix->disallowDirection('up');
+                    }
+                    if ($snakes[$c]['x'] == $my_snake['x'] && $snakes[$c]['y'] - 1 == $my_snake['y'] + 1) {
+                        $decision_matix->disallowDirection('down');
+                    }
                 }
 
-		// Avoid diagonal head collision. Collide with another head at ninty degree angle
-		if ($my_snake['length'] <= $snakes[$c]['length']) {
-			if ($my_snake['x'] - 1 == $snakes[$c]['x'] && ($my_snake['y'] + 1 == $snakes[$c]['y'] || $my_snake['y'] - 1 == $snakes[$c]['y'])) {
-                                $decision_matix->disallowDirection('left');
-                        }	
-			if ($my_snake['x'] + 1 == $snakes[$c]['x'] && ($my_snake['y'] + 1 == $snakes[$c]['y'] || $my_snake['y'] - 1 == $snakes[$c]['y'])) {
-				$decision_matix->disallowDirection('right');
-			}
-			if ($my_snake['y'] - 1 == $snakes[$c]['y'] && ($my_snake['x'] + 1 == $snakes[$c]['x'] || $my_snake['x'] - 1 == $snakes[$c]['x'])) {
-                                $decision_matix->disallowDirection('up');
-                        }
-                        if ($my_snake['y'] + 1 == $snakes[$c]['y'] && ($my_snake['x'] + 1 == $snakes[$c]['x'] || $my_snake['x'] - 1 == $snakes[$c]['x'])) {
-                                $decision_matix->disallowDirection('down');
-                        }	
-		}		
-
+                // Avoid diagonal head collision. Collide with another head at ninty degree angle
+                if ($my_snake['length'] <= $snakes[$c]['length']) {
+                    if ($my_snake['x'] - 1 == $snakes[$c]['x'] && ($my_snake['y'] + 1 == $snakes[$c]['y'] || $my_snake['y'] - 1 == $snakes[$c]['y'])) {
+                        $decision_matix->disallowDirection('left');
+                    }
+                    if ($my_snake['x'] + 1 == $snakes[$c]['x'] && ($my_snake['y'] + 1 == $snakes[$c]['y'] || $my_snake['y'] - 1 == $snakes[$c]['y'])) {
+                        $decision_matix->disallowDirection('right');
+                    }
+                    if ($my_snake['y'] - 1 == $snakes[$c]['y'] && ($my_snake['x'] + 1 == $snakes[$c]['x'] || $my_snake['x'] - 1 == $snakes[$c]['x'])) {
+                        $decision_matix->disallowDirection('up');
+                    }
+                    if ($my_snake['y'] + 1 == $snakes[$c]['y'] && ($my_snake['x'] + 1 == $snakes[$c]['x'] || $my_snake['x'] - 1 == $snakes[$c]['x'])) {
+                        $decision_matix->disallowDirection('down');
+                    }
+                }
 
                 // Avoid collision with another snake's' tail
                 for ($t = 0; $t < count($snakes[$c]['tails']); $t++) {

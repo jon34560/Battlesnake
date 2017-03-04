@@ -20,6 +20,10 @@ $app->post('/move', function (Request $request) use ($app) {
     return include '../src/BattleSnake/Route/move.php';
 })->bind('move');
 
+$app->get('/info', function (Request $request) use ($app) {
+    return include '../src/BattleSnake/Route/info.php';
+})->bind('info');
+
 
 $app->error(function (\Exception $e, Request $request, $code) use ($app) {
     if ($app['debug']) {
