@@ -113,7 +113,7 @@ class Food
                 $dirWeight = 45;
         }
 	if ($my_snake['health'] < 20){
-                $dirWeight = 200;
+                $dirWeight = 100;
         }
 
         $distances = [];
@@ -166,7 +166,7 @@ class Food
         $snakes = $state['snakes'];
         $dirWeight = 5;
 
-        if ($my_snake['health'] > 60) {  // Prioritize food when health low
+        if ($my_snake['health'] < 60) {  // Prioritize food when health low
             $dirWeight = 10;
         }
         if ($my_snake['health'] < 40){
@@ -176,7 +176,7 @@ class Food
                 $dirWeight = 45;
         }
         if ($my_snake['health'] < 20){
-                $dirWeight = 200;
+                $dirWeight = 100;
         }
 
         $distances = [];
@@ -197,9 +197,7 @@ class Food
 
 	$pathFree = true;
 
-	//$log->warning(" FOOD PATH key " . $closestKey);	
 	$distance = $distances[$closestKey];
-	//$log->warning(" FOOD PATH dist " . $distance);
 
 	$a = "";
 
@@ -224,20 +222,6 @@ class Food
 			$pathFree = false;
 		}
 		$a .= " [" . $x . "," .$y . "]" ;
-	
-		/*	
-		if(   
-			!Board::isSpaceEmpty($state, $x + 1, $y + 1, $decision_matix)
-			||	
-			!Board::isSpaceEmpty($state, $x + 1, $y - 1, $decision_matix)
-			||
-			!Board::isSpaceEmpty($state, $x - 1, $y + 1, $decision_matix)
-			||
-			!Board::isSpaceEmpty($state, $x - 1, $y + 1, $decision_matix)	
-		){
-			$pathFree = false;
-		}	
-		*/
 	}
 	//$log->warning(" FOOD PATH PATH " . ($pathFree ? '1': '0') . "   x" . $xDir . " y" . $yDir . " me ".$my_snake['x'] ." ". $my_snake['y']."   f:     " . $a );	
 	if( $pathFree ){
