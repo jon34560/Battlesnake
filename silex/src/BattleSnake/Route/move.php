@@ -29,6 +29,7 @@ Food::angleFoodSearch($state, $decision_matix);
 
 FreeSpace::linearFreeSpaceDetection($state, $decision_matix);
 FreeSpace::floodFillDetection($state, $decision_matix);
+FreeSpace::weightedFloodFillDetection($state, $decision_matix);
 
 error_log(print_r('Decision', true), 0);
 error_log(print_r($decision_matix->firstValidDirection(), true), 0);
