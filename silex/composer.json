@@ -23,7 +23,8 @@
         "symfony/twig-bridge": "~2.8|3.0.*",
         "symfony/validator": "~2.8|3.0.*",
         "filp/whoops": "^2.1",
-        "texthtml/whoops-silex": "~1.0"
+        "texthtml/whoops-silex": "~1.0",
+        "monolog/monolog": "^1.22"
     },
     "autoload": {
         "psr-0": { "BattleSnake": "src/" }

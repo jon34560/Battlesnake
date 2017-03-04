@@ -27,8 +27,14 @@ class DecisionMatrix
     // Cache Board state
     private $_tick_cache = [];
 
-    // Timestamp 
+    // Timestamp
     private $_time_stamp = 0;
+
+    private $_log;
+
+    public function __construct($log) {
+        $this->_log = $log;
+    }
 
     // Allowed Directions
     public function getAllowedDirections() {
@@ -79,63 +85,71 @@ class DecisionMatrix
 
 
     // Other
-    public function firstValidDirection() {
+    public function decideMoveDirection() {
+        // Choose direction of best target if it is > 0 and > worst target.
+        // I.e. if they are all the same skip and choose randomly later.
+        // TODO IDEA: if we can't go in one direction we should give higher preference to allowable dirs.
+        $targets = [
+          'left' => $this->_prefered_direction['left'],
+          'up' => $this->_prefered_direction['up'],
+          'right' => $this->_prefered_direction['right'],
+          'down' => $this->_prefered_direction['down']
+        ];
 
-      // Choose direction of best target if it is > 0 and > worst target. 
-      // I.e. if they are all the same skip and choose randomly later.
-      // TODO IDEA: if we can't go in one direction we should give higher preference to allowable dirs. 
-      $targets = array( 'left' => $this->_prefered_direction['left'], 
-        'up' => $this->_prefered_direction['up'], 
-        'right' => $this->_prefered_direction['right'], 
-        'down' => $this->_prefered_direction['down'] );
-      arsort($targets);
-      reset($targets);
-      $bestKey = key($targets);
-      $bestValue = $targets[$bestKey];
-      asort($targets);
-      reset($targets);
-      $worstKey = key($targets);
-      $worstValue = $targets[$worstKey];
-      if($bestValue > 0 && $bestValue > $worstValue){
-        if($bestKey == 'left' && $this->_allowed_direction['left']){
-          return 'left'; // Go left
-        } 
-        if($bestKey == 'up' && $this->_allowed_direction['up']){
-          return 'up'; // Go up
-        }
-        if($bestKey == 'right' && $this->_allowed_direction['right']){
-          return 'right'; // Go Right
-        }
-        if($bestKey == 'down' && $this->_allowed_direction['down']){
-          return 'down'; // Go Down
-        }
-      }
+        arsort($targets);
+        reset($targets);
+        $bestKey = key($targets);
+        $bestValue = $targets[$bestKey];
 
-      // Choose a random allowable direction. This prevents direction bias
-      for($i = 0; $i < 6; $i++ ){ // Try a few times to find a random direction that is available.
-        $dir = rand(0, 3);
-        if($dir == 0 && $this->_allowed_direction['left']){
-          return 'left';
-        } 
-        if($dir == 1 && $this->_allowed_direction['up']){
-          return 'up';
-        }
-        if($dir == 2 && $this->_allowed_direction['right']){
-          return 'right';
-        }
-        if($dir == 3 && $this->_allowed_direction['down']){
-          return 'down';
-        }
-      }
+        asort($targets);
+        reset($targets);
+        $worstKey = key($targets);
+        $worstValue = $targets[$worstKey];
 
-      // Choose an allowed direction
-      foreach ($this->_allowed_direction as $direction => $boolean) {
-        if ($boolean) {
-          return $direction;
+        if ($bestValue > $worstValue) {
+            if ($bestKey == 'left' && $this->_allowed_direction['left']) {
+                $this->_log->warning("******* Moving Left -> Best Value *******");
+                return 'left'; // Go left
+            }
+            if ($bestKey == 'right' && $this->_allowed_direction['right']) {
+                $this->_log->warning("******* Moving Right -> Best Value *******");
+                return 'right'; // Go Right
+            }
+            if ($bestKey == 'up' && $this->_allowed_direction['up']) {
+                $this->_log->warning("******* Moving Up -> Best Value *******");
+                return 'up'; // Go up
+            }
+            if ($bestKey == 'down' && $this->_allowed_direction['down']) {
+                $this->_log->warning("******* Moving Down -> Best Value *******");
+                return 'down'; // Go Down
+            }
         }
-      }
 
-      // Worst case
-      //return 'down';
+        if ($this->_allowed_direction['left'] || $this->_allowed_direction['right'] || $this->_allowed_direction['up'] || $this->_allowed_direction['down']) {
+            // Choose a random allowable direction. This prevents direction bias
+            while (true) { // Try a few times to find a random direction that is available.
+                $dir = rand(0, 3);
+                if ($dir == 0 && $this->_allowed_direction['left']) {
+                    $this->_log->warning("******* Moving Left -> Random *******");
+                    return 'left';
+                }
+                if ($dir == 2 && $this->_allowed_direction['right']) {
+                    $this->_log->warning("******* Moving Right -> Random *******");
+                    return 'right';
+                }
+                if ($dir == 1 && $this->_allowed_direction['up']) {
+                    $this->_log->warning("******* Moving Up -> Random *******");
+                    return 'up';
+                }
+                if ($dir == 3 && $this->_allowed_direction['down']) {
+                    $this->_log->warning("******* Moving Down -> Random *******");
+                    return 'down';
+                }
+            }
+        }
+
+        // Worst case
+        $this->_log->warning("******* Moving Down -> WE FUCKEDDDDDDDDDDDDDDDDD *******");
+        return 'down';
     }
 }
