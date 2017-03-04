@@ -26,6 +26,7 @@ Collision::snakeCollisionDetection($state, $decision_matix, $log);
 
 Food::linearFoodSearch($state, $decision_matix);
 Food::angleFoodSearch($state, $decision_matix);
+Food::pathFoodSearch($state, $decision_matix, $log);
 
 FreeSpace::linearFreeSpaceDetection($state, $decision_matix, $log);
 FreeSpace::floodFillDetection($state, $decision_matix, $log);
