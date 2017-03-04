@@ -80,7 +80,6 @@ class FreeSpace
         }
     }
 
-
     /*
     * floodFillDetection
     *
@@ -205,7 +204,7 @@ class FreeSpace
             $tx = $spaces[$key]['x'] - 1;
             $ty = $spaces[$key]['y'];
             $tKey = $tx . '_' . $ty;
-            if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !array_key_exists($tKey, $spaces)) {
+            if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
                 $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
@@ -215,7 +214,7 @@ class FreeSpace
             $tx = $spaces[$key]['x'];
             $ty = $spaces[$key]['y'] - 1;
             $tKey = $tx . '_' . $ty;
-            if (Board::isSpaceOnBoard($state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces)) {
+            if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
                 $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
@@ -225,7 +224,7 @@ class FreeSpace
             $tx = $spaces[$key]['x'] + 1;
             $ty = $spaces[$key]['y'];
             $tKey = $tx . '_' . $ty;
-            if (Board::isSpaceOnBoard($state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces)) {
+            if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
                 $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
@@ -235,7 +234,7 @@ class FreeSpace
             $tx = $spaces[$key]['x'];
             $ty = $spaces[$key]['y'] + 1;
             $tKey = $tx . '_' . $ty;
-            if (Board::isSpaceOnBoard($state, $tx , $ty, $decision_matix) && !array_key_exists($tKey, $spaces)) {
+            if (Board::isSpaceOnBoard($state, $tx, $ty, $decision_matix) && !($spaces[$tKey] ?? false)) {
                 $checkPosX = $tx;
                 $checkPosY = $ty;
                 $fillCount += self::floodFill($state, $checkPosX, $checkPosY, $spaces, $decision_matix, $depth+1);
