@@ -18,8 +18,9 @@ class FreeSpace
     */
     public static function linearFreeSpaceDetection($state, $decision_matix, $log) {
         $my_snake = $state['snakes'][$state['s']];
-        $vision = 5;
-        $spaceWeight = 10; // was 1 but 10 is better
+        $spaceWeight = 8; // was 1 but 10 is better
+
+	$vision = 5;
 
         $leftSpace = 0;
         $rightSpace = 0;
@@ -97,7 +98,7 @@ class FreeSpace
     * Description: check number of free spaces in each direction from current snake head.
     */
     public static function floodFillDetection($state, $decision_matix, $log) {
-        $fillWeight = 6; // 2; // 12 is better than 2
+        $fillWeight = 10; // 2; // 12 is better than 2
         $my_snake = $state['snakes'][$state['s']];
 
         $leftSpaces = [];
@@ -267,7 +268,7 @@ class FreeSpace
     *  WARNING: the fillWeight must be less that that of the floodFillDetection function!!!
     */
     public static function weightedFloodFillDetection($state, $decision_matix, $log) {
-        $fillWeight = 6; // 2; // 12 is better than 2
+        $fillWeight = 8; // 2; // 12 is better than 2
         $my_snake = $state['snakes'][$state['s']];
 
         $leftSpaces = [];

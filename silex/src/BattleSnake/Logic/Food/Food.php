@@ -18,7 +18,7 @@ class Food
         $snakes = $state['snakes'];
 
         $vision = 1;
-        $weight = 10;
+        $weight = 6;
         if ($my_snake['health'] < 80) {
             $vision = 4;
         }
@@ -101,19 +101,19 @@ class Food
         $dirWeight = 1;
 
         if ($my_snake['health'] < 85) {  // Prioritize food when health low
-            $dirWeight = 3;
+            $dirWeight = 2;
         }
         if ($my_snake['health'] < 50) {  // Prioritize food when health low
-            $dirWeight = 15;
+            $dirWeight = 3;
         }
 	if ($my_snake['health'] < 40){
-		$dirWeight = 25;
+		$dirWeight = 4;
 	}
 	if ($my_snake['health'] < 30){
-                $dirWeight = 45;
+                $dirWeight = 10;
         }
 	if ($my_snake['health'] < 20){
-                $dirWeight = 100;
+                $dirWeight = 20;
         }
 
         $distances = [];
@@ -166,17 +166,17 @@ class Food
         $snakes = $state['snakes'];
         $dirWeight = 5;
 
-        if ($my_snake['health'] < 60) {  // Prioritize food when health low
-            $dirWeight = 10;
+        if ($my_snake['health'] < 80) {  // Prioritize food when health low
+            $dirWeight = 7;
+        }
+        if ($my_snake['health'] < 60){
+                $dirWeight = 10;
         }
         if ($my_snake['health'] < 40){
-                $dirWeight = 25;
-        }
-        if ($my_snake['health'] < 30){
-                $dirWeight = 45;
+                $dirWeight = 15;
         }
         if ($my_snake['health'] < 20){
-                $dirWeight = 100;
+                $dirWeight = 20;
         }
 
         $distances = [];

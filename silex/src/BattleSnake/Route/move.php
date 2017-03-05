@@ -25,7 +25,7 @@ Collision::selfCollisionDetection($state, $decision_matix, $log);
 Collision::snakeCollisionDetection($state, $decision_matix, $log);
 
 Food::linearFoodSearch($state, $decision_matix);
-Food::angleFoodSearch($state, $decision_matix);
+//Food::angleFoodSearch($state, $decision_matix);
 Food::pathFoodSearch($state, $decision_matix, $log);
 
 FreeSpace::linearFreeSpaceDetection($state, $decision_matix, $log);
@@ -35,5 +35,13 @@ FreeSpace::preferWallGap($state, $decision_matix, $log);
 FreeSpace::preferSelfGap($state, $decision_matix, $log);
 
 
-$return_data = array( 'move' => $decision_matix->decideMoveDirection(), 'taunt' => 'Everyone wins!' );
+//$taunts = array('MATT DAMON', 'x', 'The greatest that ever was.');
+//$taunt = $taunts[rand(0, sizeof($taunts)-1)];
+
+//if( $state['ticks'] % 15 ){
+	$return_data = array( 'move' => $decision_matix->decideMoveDirection(), 'taunt' => 'MATT DAMON' );
+//} else {
+//	$return_data = array( 'move' => $decision_matix->decideMoveDirection() );
+//}
+
 return $app->json($return_data, 200);

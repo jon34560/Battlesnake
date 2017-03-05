@@ -12,7 +12,7 @@ $request_data = json_decode($request->getContent(), true);
 error_log(print_r($request_data, true), 0);
 
 $return_data = array(
-  'color' => '#6060FF',
+  'color' => '#664400',
   'head_url' => 'http://35.160.151.56/images/Matt.png',
   'name' => 'Matt Damon',
   'taunt' => 'Matt DAMON'
